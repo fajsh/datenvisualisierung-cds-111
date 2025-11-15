@@ -56,7 +56,7 @@ app.layout = html.Div(children=[
     html.H1(children='Dashboard Energieerzeugung Schweiz 2025', style={'textAlign': 'center'}),
 
     dcc.Tabs(id="tabs-charts", value='tab-donut', children=[
-        dcc.Tab(label='Gesamtübersicht nach Monat', value='tab-donut', children=[
+        dcc.Tab(label='Tab 1', value='tab-donut', children=[
             html.Div([
                 html.Label('Monat auswählen:'),
                 dcc.Dropdown(
@@ -67,7 +67,7 @@ app.layout = html.Div(children=[
             ], style={'width': '50%', 'margin': 'auto', 'paddingTop': '20px'}),
             dcc.Graph(id='donut-chart')
         ]),
-        dcc.Tab(label='Monatliche Aufteilung (Prozent)', value='tab-bar', children=[
+        dcc.Tab(label='Tab 2', value='tab-bar', children=[
             html.Div([
                 html.Label('Monatsbereich auswählen:'),
                 dcc.RangeSlider(
