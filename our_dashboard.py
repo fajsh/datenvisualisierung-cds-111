@@ -9,13 +9,16 @@ import numpy as np
 try:
     df_raw = pd.read_csv('cleaned_dataset.csv')
     df_raw['Datum'] = pd.to_datetime(df_raw['Datum'], format='%Y-%m-%d')
+    
+    columns = df_raw.columns.to_list()
 
+    
     columns_to_process = [
         'Laufwerke', 'Speicherwerke', 'Total Hydraulisch', 'Kernkraftwerke',
         'Thermisch', 'Windkraft', 'Photovoltaik', 'Total Erneuerbar'
     ]
 
-    df_monthly_sums = df_raw.groupby(pd.Grouper(key='Datum', freq='M'))[columns_to_process].sum().round(2)
+    df_monthly_sums = df_raw.groupby(pd.Grouper(key='Datum', freq='ME'))[columns_to_process].sum().round(2)
     df_monthly_sums = df_monthly_sums.reset_index()
     # Keep a numeric month for filtering later
     df_monthly_sums['Monat_Num'] = df_monthly_sums['Datum'].dt.month
@@ -35,8 +38,9 @@ df = df_monthly_sums.copy()
 df = df.drop(columns=['Laufwerke', 'Speicherwerke', 'Total Erneuerbar'])
 
 energy_sources = ['Total Hydraulisch', 'Kernkraftwerke', 'Photovoltaik', 'Thermisch', 'Windkraft']
+columns_for_heatmap = ['Einfuhr', 'Ausfuhr', 'Landesverbrauch']
 
-# Data for bar chart (percentages)
+# s)
 df_plot = df[df['Monat'] != 'Total'].copy()
 df_percent = df_plot.copy()
 df_percent[energy_sources] = df_percent[energy_sources].div(df_percent[energy_sources].sum(axis=1), axis=0) * 100
@@ -81,16 +85,194 @@ app.layout = html.Div(children=[
             ], style={'padding': '20px 50px'}),
             dcc.Graph(id='stacked-bar-chart')
         ]),
+        dcc.Tab(label= 'Heatmap', value='tab-heatmap', children=[
+            html.Div([
+                html.Label('Jahr:'),
+                dcc.Dropdown(id= 'year-heatmap', options=[{'label': int(y), 'value': int(y)} for y in sorted(df_raw['Datum'].dt.year.unique())],
+            value=int(df_raw['Datum'].dt.year.max()),  # Startwert
+            clearable=False),
+                dcc.Graph(id='heatmap')
+
+            ])]),
+
+        dcc.Tab(label='Zeitverlauf', value='tab-area', children=[
+            html.Div([
+                html.Label('Year'),
+                dcc.Dropdown(
+                    id='year-area',
+                    options=[{'label': int(y), 'value': int(y)} for y in sorted(df_raw['Datum'].dt.year.unique())],
+                    value=int(df_raw['Datum'].dt.year.max()),
+                    clearable=False,
+                    style={'width': '180px', 'marginBottom': '8px'}
+                ),
+
+        dcc.Checklist(
+            id='area-series',
+            options=[
+                {'label': 'Verbrauch Speicherpumpe', 'value': 'Verbrauch Speicherpumpe'},
+                {'label': 'Import', 'value': 'Import'},
+                {'label': 'Export', 'value': 'Export'},
+                {'label': 'Nettoerzeugung', 'value': 'Nettoerzeugung'},
+                {'label': 'Landeserzeugung', 'value': 'Landeserzeugung'},
+            ],
+            value=[
+                'Verbrauch Speicherpumpe','Import','Export','Nettoerzeugung','Landeserzeugung'
+            ],
+            inline=True
+        ),
+
+        dcc.Graph(id='area-chart')], 
+        style={'padding': '12px 18px'})
+])
+
     ])
 ])
 
 # --- 4. DEFINE CALLBACKS FOR INTERACTIVITY ---
 
-# Callback for Donut Chart
+# Callback 
+
+from dash import Input, Output
+
+@app.callback(
+    Output('area-chart', 'figure'),
+    Input('year-area', 'value'),
+    Input('area-series', 'value')  
+)
+def update_area_chart(selected_year, selected_series):
+    d = df_raw.copy()
+    d['Datum'] = pd.to_datetime(d['Datum'], errors='coerce')
+    d = d[d['Datum'].dt.year == selected_year].copy()
+    d['Monat'] = d['Datum'].dt.month
+
+    series_order_raw = [
+        "Verbrauch Speicherpumpen", "Einfuhr", "Ausfuhr",
+        "Nettoerzeugung Total", "Total Erneuerbar",
+    ]
+    rename_map = {
+        "Verbrauch Speicherpumpen": "Verbrauch Speicherpumpe",
+        "Einfuhr": "Import",
+        "Ausfuhr": "Export",
+        "Nettoerzeugung Total": "Nettoerzeugung",
+        "Total Erneuerbar": "Landeserzeugung",
+    }
+    monthly = (
+        d.groupby('Monat')[series_order_raw].sum()
+         .reindex(range(1, 13))
+         .rename(columns=rename_map)
+    )
+    month_names = {1:"Jan",2:"Feb",3:"Mär",4:"Apr",5:"Mai",6:"Jun",7:"Jul",8:"Aug",9:"Sep",10:"Okt",11:"Nov",12:"Dez"}
+    x_order = [month_names[m] for m in range(1,13)]
+    monthly.index = x_order
+
+    colors = {
+        "Verbrauch Speicherpumpe": "#b91c1c",
+        "Import": "#ef4444",
+        "Export": "#f472b6",
+        "Nettoerzeugung": "#f9a8d4",
+        "Landeserzeugung": "#cbeef3",
+    }
+
+    import plotly.graph_objects as go
+    fig = go.Figure()
+    order = ["Verbrauch Speicherpumpe","Import","Export","Nettoerzeugung","Landeserzeugung"]
+
+    for name in order:
+        y = monthly[name].to_list()
+        fig.add_scatter(
+            x=x_order, y=y, name=name,
+            mode="lines+markers",
+            line=dict(color=colors[name], width=2),
+            marker=dict(size=5, color=colors[name]),
+            stackgroup="one",
+            connectgaps=False,
+            hovertemplate=f"{name}<br>%{{x}}: %{{y:.0f}}<extra></extra>",
+            
+            visible=True if (name in (selected_series or [])) else "legendonly"
+        )
+
+    fig.update_layout(
+        title="Zeitverlauf- und Energieflussgrössen",
+        hovermode="x unified",
+        plot_bgcolor="white",
+        margin=dict(l=40, r=20, t=50, b=60),
+        legend=dict(
+            orientation="h", yanchor="bottom", y=-0.25, x=0, xanchor="left",
+            itemclick="toggle", itemdoubleclick="toggleothers"  # 👈 Legend-Interaktion
+        )
+    )
+    fig.update_xaxes(type="category", categoryorder="array", categoryarray=x_order,
+                     title="", showgrid=True, gridcolor="#e5e7eb")
+    fig.update_yaxes(title="", showgrid=True, gridcolor="#e5e7eb", zeroline=False, rangemode="tozero")
+    return fig
+
+
+
+
+@app.callback(
+    Output('heatmap', 'figure'),
+    Input('year-heatmap', 'value')
+)
+def update_heatmap(selected_year):
+   
+    df_year = df_raw[df_raw['Datum'].dt.year == selected_year].copy()
+    df_year['Monat'] = df_year['Datum'].dt.month
+
+    
+    hm = df_year.groupby('Monat')[columns_for_heatmap].sum()
+   
+    hm = hm.reindex(range(1, 12+1), fill_value=np.nan).T  # Zeilen=Kategorien, Spalten=Monate
+
+    
+    month_map = {1:'Januar',2:'Februar',3:'März',4:'April',5:'Mai',6:'Juni',
+                 7:'Juli',8:'August',9:'September',10:'Oktober',11:'November',12:'Dezember'}
+    x_labels = [month_map[m] for m in hm.columns]
+
+    
+    fig = go.Figure(data=go.Heatmap(
+        z=hm.values,
+        x=x_labels,
+        y=hm.index.tolist(),
+        colorscale=[
+    [0.00, "#880d1e"],
+    [0.25, "#dd2d4a"],
+    [0.50, "#f26a8d"],
+    [0.75, "#f49cbb"],
+    [1.00, "#cbeef3"],
+        ],
+        zmin=np.nanmin(hm.values),
+        zmax=np.nanmax(hm.values),
+        colorbar=dict(title="Wert")
+    ))
+
+   
+    annotations = []
+    for i, cat in enumerate(hm.index):
+        for j, mon in enumerate(x_labels):
+            val = hm.iloc[i, j]
+            label = "" if pd.isna(val) else f"{val:.0f}"
+            annotations.append(dict(
+                x=mon, y=cat, text=label, showarrow=False, font=dict(color="#0c4a6e", size=12)
+            ))
+    fig.update_layout(annotations=annotations)
+
+    fig.update_layout(
+        title=f'Einfuhr / Ausfuhr / Landesverbrauch pro Monat – {selected_year}',
+        xaxis_title='Monat',
+        yaxis_title='Kategorie',
+        margin=dict(l=60, r=20, t=60, b=50),
+        plot_bgcolor="white"
+    )
+    return fig
+
+
 @app.callback(
     Output('donut-chart', 'figure'),
     Input('month-dropdown', 'value')
 )
+
+
+
 def update_donut_chart(selected_month):
     filtered_df = df[df['Monat'] == selected_month]
     values_total = filtered_df[energy_sources].values.flatten()

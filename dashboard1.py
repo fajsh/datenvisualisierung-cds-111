@@ -20,4 +20,4 @@ def update_graph(dropdown_value_color):
     return fig
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run(debug=False)
