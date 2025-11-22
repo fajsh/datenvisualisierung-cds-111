@@ -85,15 +85,35 @@ app.layout = html.Div(children=[
             ], style={'padding': '20px 50px'}),
             dcc.Graph(id='stacked-bar-chart')
         ]),
-        dcc.Tab(label= 'Heatmap', value='tab-heatmap', children=[
+       
+        dcc.Tab(label='Heatmap', value='tab-heatmap', children=[
             html.Div([
-                html.Label('Jahr:'),
-                dcc.Dropdown(id= 'year-heatmap', options=[{'label': int(y), 'value': int(y)} for y in sorted(df_raw['Datum'].dt.year.unique())],
-            value=int(df_raw['Datum'].dt.year.max()),  # Startwert
-            clearable=False),
-                dcc.Graph(id='heatmap')
+                
+                html.Div(id="avg-box", style={
+                    "background":"#F3F4F6","borderRadius":"18px","padding":"28px",
+                    "width":"220px","height":"130px","display":"flex","alignItems":"center",
+                    "justifyContent":"center","fontWeight":"700","fontSize":"26px","color":"#0f172a"
+                }),
 
-            ])]),
+               
+                html.Div([
+                    html.Div([
+                        html.H3("Import, Export und Verbrauch pro", style={"margin":"0 0 8px 0"}),
+                        dcc.Dropdown(
+                            id='year-heatmap',
+                            options=[{'label': int(y), 'value': int(y)} 
+                                    for y in sorted(df_raw['Datum'].dt.year.unique())],
+                            value=int(df_raw['Datum'].dt.year.max()),  # Startjahr
+                            clearable=False,
+                            style={"width":"200px"}
+                        ),
+                    ], style={"display":"flex","gap":"16px","alignItems":"center","marginBottom":"8px"}),
+
+                    dcc.Graph(id='heatmap', config={"displayModeBar": False}, style={"height":"520px"})
+                ], style={"flex":"1"})
+            ], style={"display":"flex","gap":"24px","alignItems":"flex-start","padding":"14px"})
+        ])
+,
 
         dcc.Tab(label='Zeitverlauf', value='tab-area', children=[
             html.Div([
@@ -209,61 +229,94 @@ def update_area_chart(selected_year, selected_series):
 
 
 
+from dash.exceptions import PreventUpdate
+
+
+columns_for_heatmap = ['Einfuhr', 'Ausfuhr', 'Landesverbrauch']
+
 @app.callback(
     Output('heatmap', 'figure'),
+    Output('avg-box', 'children'),
     Input('year-heatmap', 'value')
 )
 def update_heatmap(selected_year):
-   
-    df_year = df_raw[df_raw['Datum'].dt.year == selected_year].copy()
-    df_year['Monat'] = df_year['Datum'].dt.month
+    if selected_year is None:
+        raise PreventUpdate
 
     
-    hm = df_year.groupby('Monat')[columns_for_heatmap].sum()
-   
-    hm = hm.reindex(range(1, 12+1), fill_value=np.nan).T  # Zeilen=Kategorien, Spalten=Monate
+    d = df_raw[df_raw['Datum'].dt.year == selected_year].copy()
+    d['Monat'] = d['Datum'].dt.month
+    hm = (
+        d.groupby('Monat')[columns_for_heatmap]
+         .sum()
+         .reindex(range(1,13))   
+         .T                       
+    )
 
     
     month_map = {1:'Januar',2:'Februar',3:'März',4:'April',5:'Mai',6:'Juni',
                  7:'Juli',8:'August',9:'September',10:'Oktober',11:'November',12:'Dezember'}
-    x_labels = [month_map[m] for m in hm.columns]
+    x_labels = [month_map[i] for i in hm.columns]
+    y_labels = hm.index.tolist()
+
+    Z = hm.values.astype('float')
+    zmin = np.nanmin(Z)
+    zmax = np.nanmax(Z)
+
+   
+    colorscale = [
+        [0.00, "#880d1e"],
+        [0.25, "#dd2d4a"],
+        [0.50, "#f26a8d"],
+        [0.75, "#f49cbb"],
+        [1.00, "#cbeef3"],
+    ]
 
     
-    fig = go.Figure(data=go.Heatmap(
-        z=hm.values,
+    heat = go.Heatmap(
+        z=Z,
         x=x_labels,
-        y=hm.index.tolist(),
-        colorscale=[
-    [0.00, "#880d1e"],
-    [0.25, "#dd2d4a"],
-    [0.50, "#f26a8d"],
-    [0.75, "#f49cbb"],
-    [1.00, "#cbeef3"],
-        ],
-        zmin=np.nanmin(hm.values),
-        zmax=np.nanmax(hm.values),
-        colorbar=dict(title="Wert")
-    ))
+        y=y_labels,
+        colorscale=colorscale,
+        zmin=zmin, zmax=zmax,
+        showscale=False,   
+        xgap=6, ygap=14    
+    )
+
+    fig = go.Figure(data=[heat])
+
+    
+    fig.update_layout(plot_bgcolor="#F3F4F6", paper_bgcolor="white")
 
    
     annotations = []
-    for i, cat in enumerate(hm.index):
+    for i, cat in enumerate(y_labels):
         for j, mon in enumerate(x_labels):
-            val = hm.iloc[i, j]
-            label = "" if pd.isna(val) else f"{val:.0f}"
+            val = Z[i, j]
+            label = "" if (np.isnan(val)) else f"{val:.0f}"
             annotations.append(dict(
-                x=mon, y=cat, text=label, showarrow=False, font=dict(color="#0c4a6e", size=12)
+                x=mon, y=cat, text=label,
+                showarrow=False, font=dict(size=12, color="#0c4a6e")
             ))
     fig.update_layout(annotations=annotations)
 
+    
+    fig.update_xaxes(title="", showgrid=False, tickangle=0)
+    fig.update_yaxes(title="", showgrid=False)
     fig.update_layout(
-        title=f'Einfuhr / Ausfuhr / Landesverbrauch pro Monat – {selected_year}',
-        xaxis_title='Monat',
-        yaxis_title='Kategorie',
-        margin=dict(l=60, r=20, t=60, b=50),
-        plot_bgcolor="white"
+        margin=dict(l=70, r=20, t=40, b=50),
+        title=f"Import, Export und Verbrauch pro – {selected_year}",
     )
-    return fig
+
+   
+    avg = np.nanmean(Z)
+    avg_box_children = html.Div([
+        html.Div(f"{avg:.0f}", style={"fontSize":"34px","fontWeight":"800","lineHeight":"1"}),
+        html.Div("Average", style={"fontSize":"18px","fontWeight":"700","color":"#111827"})
+    ])
+
+    return fig, avg_box_children
+
 
 
 @app.callback(
