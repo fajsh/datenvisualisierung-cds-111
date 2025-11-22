@@ -86,34 +86,55 @@ app.layout = html.Div(children=[
             dcc.Graph(id='stacked-bar-chart')
         ]),
        
-        dcc.Tab(label='Heatmap', value='tab-heatmap', children=[
-            html.Div([
-                
-                html.Div(id="avg-box", style={
-                    "background":"#F3F4F6","borderRadius":"18px","padding":"28px",
-                    "width":"220px","height":"130px","display":"flex","alignItems":"center",
-                    "justifyContent":"center","fontWeight":"700","fontSize":"26px","color":"#0f172a"
-                }),
+dcc.Tab(label='Heatmap', value='tab-heatmap', children=[
+    html.Div([
+        html.Div([
+            html.Label('Jahr:'),
+            dcc.Dropdown(
+                id='year-heatmap',
+                options=[{'label': int(y), 'value': int(y)}
+                         for y in sorted(df_raw['Datum'].dt.year.unique())],
+                value=int(df_raw['Datum'].dt.year.max()),
+                clearable=False,
+                style={"width":"160px"}
+            ),
+            dcc.Dropdown(
+    id="months",
+    options=[{"label": m, "value": i} for i, m in enumerate(
+        ["Januar","Februar","März","April","Mai","Juni","Juli",
+         "August","September","Oktober","November","Dezember"], start=1)],
+    value=list(range(1,13))  
+),
 
-               
-                html.Div([
-                    html.Div([
-                        html.H3("Import, Export und Verbrauch pro", style={"margin":"0 0 8px 0"}),
-                        dcc.Dropdown(
-                            id='year-heatmap',
-                            options=[{'label': int(y), 'value': int(y)} 
-                                    for y in sorted(df_raw['Datum'].dt.year.unique())],
-                            value=int(df_raw['Datum'].dt.year.max()),  # Startjahr
-                            clearable=False,
-                            style={"width":"200px"}
-                        ),
-                    ], style={"display":"flex","gap":"16px","alignItems":"center","marginBottom":"8px"}),
+            html.Label('Palette:', style={"marginLeft":"12px"}),
+            dcc.Dropdown(
+                id='palette-heatmap',
+                options=[
+                    {'label':'Blautöne', 'value':'blue'},
+                    {'label':'Rosa→Hellblau', 'value':'rose'},
+                    {'label':'Viridis', 'value':'viridis'}
+                ],
+                value='rose',
+                clearable=False,
+                style={"width":"200px"}
+            ),
+        ], style={"display":"flex","gap":"12px","alignItems":"center","marginBottom":"12px"}),
 
-                    dcc.Graph(id='heatmap', config={"displayModeBar": False}, style={"height":"520px"})
-                ], style={"flex":"1"})
-            ], style={"display":"flex","gap":"24px","alignItems":"flex-start","padding":"14px"})
-        ])
-,
+        html.Div([
+            html.Div(id="avg-import",  style={"background":"#F3F4F6","borderRadius":"18px","padding":"18px",
+                                              "width":"220px","height":"110px","display":"flex","flexDirection":"column",
+                                              "justifyContent":"center"}),
+            html.Div(id="avg-export",  style={"background":"#F3F4F6","borderRadius":"18px","padding":"18px",
+                                              "width":"220px","height":"110px","display":"flex","flexDirection":"column",
+                                              "justifyContent":"center"}),
+            html.Div(id="avg-landes",  style={"background":"#F3F4F6","borderRadius":"18px","padding":"18px",
+                                              "width":"220px","height":"110px","display":"flex","flexDirection":"column",
+                                              "justifyContent":"center"}),
+        ], style={"display":"flex","gap":"16px","marginBottom":"8px"}),
+
+        dcc.Graph(id='heatmap', config={"displayModeBar": False}, style={"height":"520px"})
+    ], style={"padding":"14px"})
+]),
 
         dcc.Tab(label='Zeitverlauf', value='tab-area', children=[
             html.Div([
@@ -140,6 +161,7 @@ app.layout = html.Div(children=[
             ],
             inline=True
         ),
+        
 
         dcc.Graph(id='area-chart')], 
         style={'padding': '12px 18px'})
@@ -228,94 +250,88 @@ def update_area_chart(selected_year, selected_series):
 
 
 
-
 from dash.exceptions import PreventUpdate
-
+import numpy as np
+import plotly.graph_objects as go
 
 columns_for_heatmap = ['Einfuhr', 'Ausfuhr', 'Landesverbrauch']
 
 @app.callback(
     Output('heatmap', 'figure'),
-    Output('avg-box', 'children'),
-    Input('year-heatmap', 'value')
+    Output('avg-import', 'children'),
+    Output('avg-export', 'children'),
+    Output('avg-landes', 'children'),
+    Input('year-heatmap', 'value'),
+    Input('palette-heatmap', 'value'),
 )
-def update_heatmap(selected_year):
+def update_heatmap(selected_year, palette):
     if selected_year is None:
         raise PreventUpdate
 
-    
+
     d = df_raw[df_raw['Datum'].dt.year == selected_year].copy()
     d['Monat'] = d['Datum'].dt.month
     hm = (
         d.groupby('Monat')[columns_for_heatmap]
          .sum()
-         .reindex(range(1,13))   
-         .T                       
+         .reindex(range(1, 13))  
+         .T                      
     )
 
-    
+    # Labels
     month_map = {1:'Januar',2:'Februar',3:'März',4:'April',5:'Mai',6:'Juni',
                  7:'Juli',8:'August',9:'September',10:'Oktober',11:'November',12:'Dezember'}
     x_labels = [month_map[i] for i in hm.columns]
     y_labels = hm.index.tolist()
+    Z = hm.values.astype(float)
 
-    Z = hm.values.astype('float')
-    zmin = np.nanmin(Z)
-    zmax = np.nanmax(Z)
 
-   
-    colorscale = [
-        [0.00, "#880d1e"],
-        [0.25, "#dd2d4a"],
-        [0.50, "#f26a8d"],
-        [0.75, "#f49cbb"],
-        [1.00, "#cbeef3"],
-    ]
+    if palette == 'blue':
+        colorscale = [[0.00,"#E6F7FF"],[0.25,"#BAECFE"],[0.50,"#8EE2FD"],[0.75,"#63D8FC"],[1.00,"#37CEFB"]]
+    elif palette == 'viridis':
+        colorscale = 'Viridis'
+    else: 
+        colorscale = [[0.00,"#880d1e"],[0.25,"#dd2d4a"],[0.50,"#f26a8d"],[0.75,"#f49cbb"],[1.00,"#cbeef3"]]
 
-    
-    heat = go.Heatmap(
-        z=Z,
-        x=x_labels,
-        y=y_labels,
+
+    fig = go.Figure(go.Heatmap(
+        z=Z, x=x_labels, y=y_labels,
         colorscale=colorscale,
-        zmin=zmin, zmax=zmax,
-        showscale=False,   
-        xgap=6, ygap=14    
-    )
-
-    fig = go.Figure(data=[heat])
-
-    
+        zmin=np.nanmin(Z), zmax=np.nanmax(Z),
+        showscale=False, xgap=6, ygap=14
+    ))
     fig.update_layout(plot_bgcolor="#F3F4F6", paper_bgcolor="white")
 
-   
+
     annotations = []
     for i, cat in enumerate(y_labels):
         for j, mon in enumerate(x_labels):
             val = Z[i, j]
-            label = "" if (np.isnan(val)) else f"{val:.0f}"
-            annotations.append(dict(
-                x=mon, y=cat, text=label,
-                showarrow=False, font=dict(size=12, color="#0c4a6e")
-            ))
-    fig.update_layout(annotations=annotations)
-
-    
-    fig.update_xaxes(title="", showgrid=False, tickangle=0)
-    fig.update_yaxes(title="", showgrid=False)
+            txt = "" if np.isnan(val) else f"{val:.0f}"
+            annotations.append(dict(x=mon, y=cat, text=txt, showarrow=False,
+                                    font=dict(size=12, color="#0c4a6e")))
     fig.update_layout(
-        margin=dict(l=70, r=20, t=40, b=50),
-        title=f"Import, Export und Verbrauch pro – {selected_year}",
+        annotations=annotations,
+        title=f'Import, Export und Verbrauch pro – {selected_year}',
+        xaxis_title='', yaxis_title='',
+        margin=dict(l=70, r=20, t=40, b=50)
     )
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(showgrid=False)
 
-   
-    avg = np.nanmean(Z)
-    avg_box_children = html.Div([
-        html.Div(f"{avg:.0f}", style={"fontSize":"34px","fontWeight":"800","lineHeight":"1"}),
-        html.Div("Average", style={"fontSize":"18px","fontWeight":"700","color":"#111827"})
-    ])
+  
+    means = hm.mean(axis=1, skipna=True) 
+    def card(title, value):
+        return html.Div([
+            html.Div(f"{value:.0f}", style={"fontSize":"28px","fontWeight":"800","lineHeight":"1","color":"#0f172a"}),
+            html.Div(f"{title} (Average)", style={"fontSize":"14px","fontWeight":"600","color":"#111827"})
+        ])
 
-    return fig, avg_box_children
+    avg_import = card("Import",         float(means.get('Einfuhr', np.nan)))
+    avg_export = card("Export",         float(means.get('Ausfuhr', np.nan)))
+    avg_landes = card("Landesverbrauch",float(means.get('Landesverbrauch', np.nan)))
+
+    return fig, avg_import, avg_export, avg_landes
 
 
 
