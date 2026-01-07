@@ -78,7 +78,7 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
             # legendgroup="rhine",
             marker=dict(color=WASSERFUEHRUNG, size=9  # , line=dict(width=1, color=axis_color)
                         ),
-            opacity=0.0,  # off by default
+            opacity=1.0,  # on by default
             # showlegend=True,
         ),
         secondary_y=True)  # trace 2
@@ -92,7 +92,7 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
             name="Wasserführung Rhein (grau)",
             # legendgroup="rhine",
             marker=dict(color=GRAU, size=9),
-            opacity=0.35,  # on (grey) by default
+            opacity=0.0,  # off by default
             # hoverinfo="skip",
             showlegend=False,
         ),
