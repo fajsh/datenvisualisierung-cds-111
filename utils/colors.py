@@ -18,3 +18,11 @@ ENERGY_COLORS = {
     "Kernkraftwerke": "#B279A2",  # neutral, technisch (Violett)
     "Thermisch":     "#9D9D9D"   # grau = konventionell/unspezifisch
 }
+
+LANDESVERBRAUCH = "#ffb3ba"
+WASSERFUEHRUNG = "#ffffba"
+GRAU = "#d3d3d3"
+ACHSE = "white"
+LEGENDE_HINTERGRUND = "rgba(0,0,0,0.75)"
+TOGGLE_HINTERGRUND = "grey"
+TOGGLE_TEXT = "black"
