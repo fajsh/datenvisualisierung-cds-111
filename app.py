@@ -25,11 +25,11 @@ df_cleaned = load_cleaned_dataset()
 st.subheader("Produktion")
 plot_landeserzeugung(df_monthly)
 
-"""st.subheader("Verbrauch")
-plot_verbrauch(df_monthly)
+# st.subheader("Verbrauch")
+# plot_verbrauch(df_monthly)
 
-st.subheader("Regionale Analyse")
-plot_kantonskarte()"""g
+# st.subheader("Regionale Analyse")
+# plot_kantonskarte()
 
 # Temperature Scatterplot
 st.subheader("Temperatur & Verbrauch")
