@@ -3,10 +3,7 @@
 ## Projektbeschreibung
 Interaktives Dashboard zur Analyse von Energieproduktion und -verbrauch sowie die regionalen Unterschieden in der Schweiz.
 
-## Team
-- Person 1: Energieproduktion
-- Person 2: Verbrauch & Zeitreihen
-- Person 3: Regionale Visualisierungen
+--> noch hinzufügen: Quelle vom Datensatz
 
 ## Architektur
 - Datenimport: /data

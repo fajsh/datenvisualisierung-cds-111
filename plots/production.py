@@ -9,13 +9,17 @@ import plotly.graph_objects as go
 from utils.colors import ENERGY_COLORS
 
 
+import streamlit as st
+import plotly.graph_objects as go
+import calendar
+from utils.colors import ENERGY_COLORS
+
+
 def plot_stacked_bar_interactive(df_monthly_sums):
     # -------------------------------------------------
     # DATA PREP
     # -------------------------------------------------
     df = df_monthly_sums.copy()
-
-    # Total-Zeile entfernen
     df = df[df['Monat'] != 'Total']
 
     energy_sources = [
@@ -27,7 +31,17 @@ def plot_stacked_bar_interactive(df_monthly_sums):
         'Photovoltaik'
     ]
 
-    months = df['Monat'].tolist()
+    # -------------------------------------------------
+    # Monat-Mapping: numerisch -> Name
+    # -------------------------------------------------
+    month_map = {
+        f"{i:02d}": calendar.month_name[i]
+        for i in range(1, 13)
+    }
+
+    df["Monat_Name"] = df["Monat"].map(month_map)
+
+    months_display = df["Monat_Name"].tolist()
 
     # -------------------------------------------------
     # PLOTLY STACKED BAR
@@ -37,7 +51,7 @@ def plot_stacked_bar_interactive(df_monthly_sums):
     for source in energy_sources:
         fig.add_trace(
             go.Bar(
-                x=months,
+                x=months_display,
                 y=df[source],
                 name=source,
                 marker_color=ENERGY_COLORS.get(source),
