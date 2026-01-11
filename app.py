@@ -3,7 +3,7 @@ import streamlit as st
 from data.load_data import load_monthly_sums, load_cleaned_dataset
 from layout.sidebar import render_sidebar
 from layout.header import render_header
-from plots.production import plot_landeserzeugung
+from plots.production import plot_donut_with_month_selector, plot_stacked_bar_interactive
 from plots.temperature_scatterplot import temp_scatter
 #from plots.consumption import plot_verbrauch
 #from plots.geography import plot_kantonskarte
@@ -23,7 +23,8 @@ df_monthly = load_monthly_sums()
 df_cleaned = load_cleaned_dataset()
 
 st.subheader("Produktion")
-plot_landeserzeugung(df_monthly)
+plot_stacked_bar_interactive(df_monthly)
+plot_donut_with_month_selector(df_monthly)
 
 # st.subheader("Verbrauch")
 # plot_verbrauch(df_monthly)
