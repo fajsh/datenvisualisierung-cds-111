@@ -1,0 +1,7 @@
+streamlit
+pandas
+matplotlib
+numpy
+
+
+--> noch hinzufügen: alle libraries, die verwendet wurden!

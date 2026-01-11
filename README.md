@@ -1,10 +1,15 @@
-# datenvisualisierung-cds-111
+# Energy Dashboard 2025
 
-## Zu Aufgabenblatt 4
-Aufgabe 7a: dataset.ipynb
+## Projektbeschreibung
+Interaktives Dashboard zur Analyse von Energieproduktion und -verbrauch sowie die regionalen Unterschieden in der Schweiz.
 
-Aufgabe 7b: - daashhy.ipynb
-            - main.py
-            - visualizations_ajshe.ipynb
+--> noch hinzufügen: Quelle vom Datensatz
 
-Aufgabe 8a & 8b: dashboard1.py
+## Architektur
+- Datenimport: /data
+- Visualisierungen: /plots
+- Layout & UI: /layout
+- Globale Zustände: /state
+
+## Starten
+streamlit run app.py
