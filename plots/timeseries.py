@@ -1,0 +1,63 @@
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
+
+
+def plot_time_series(df_cleaned):
+    df = df_cleaned.copy()
+    df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce")
+    df = df.dropna(subset=["Datum"])
+
+    metrics = {
+        "Einfuhr": "Import",
+        "Ausfuhr": "Export",
+        "Nettoerzeugung Total": "Nettoerzeugung",
+        "Landesverbrauch": "Landesverbrauch",
+    }
+    missing = [col for col in metrics if col not in df.columns]
+    if missing:
+        st.info("Zeitverlauf: Spalten fehlen: " + ", ".join(missing))
+        return
+
+    df = df.set_index("Datum")
+    monthly = df[list(metrics.keys())].resample("M").sum()
+    monthly = monthly.reindex(pd.date_range(monthly.index.min(), monthly.index.max(), freq="M"))
+    monthly = monthly.fillna(0)
+    month_labels = [d.strftime("%b") for d in monthly.index]
+
+    palette = [
+        "#768E78",
+        "#C6C09C",
+        "#EBDEC0",
+        "#E79897",
+        "#FCAC83",
+        "#FCC88A",
+        "#E0C1A6",
+        "#8096AD",
+    ]
+
+    fig = go.Figure()
+    for idx, (key, label) in enumerate(metrics.items()):
+        color = palette[idx % len(palette)]
+        fig.add_trace(
+            go.Scatter(
+                x=month_labels,
+                y=monthly[key],
+                name=label,
+                stackgroup="one",
+                mode="lines",
+                line={"color": color},
+                fillcolor=color,
+                hovertemplate=f"{label}: %{{y:.0f}} kWh<extra></extra>",
+            )
+        )
+
+    fig.update_layout(
+        title="Zeitverlauf und Energieflussgroessen",
+        xaxis_title="Monat",
+        yaxis_title="kWh",
+        hovermode="x unified",
+        margin={"l": 10, "r": 10, "t": 40, "b": 10},
+    )
+
+    st.plotly_chart(fig, use_container_width=True)

@@ -2,6 +2,10 @@ streamlit
 pandas
 matplotlib
 numpy
+plotly
+openpyxl
+folium
+streamlit-folium
 
 
 --> noch hinzufügen: alle libraries, die verwendet wurden!

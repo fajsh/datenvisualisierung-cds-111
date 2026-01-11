@@ -3,10 +3,13 @@ import streamlit as st
 from data.load_data import load_monthly_sums, load_cleaned_dataset
 from layout.sidebar import render_sidebar
 from layout.header import render_header
+from plots.kpi import plot_kpis
+from plots.timeseries import plot_time_series
+from plots.heatmap import plot_heatmap_import_export
 from plots.production import plot_donut_with_month_selector, plot_stacked_bar_interactive
 from plots.temperature_scatterplot import temp_scatter
 #from plots.consumption import plot_verbrauch
-#from plots.geography import plot_kantonskarte
+from plots.geography import plot_kantonskarte
 from state.session_state import init_state
 
 st.set_page_config(
@@ -26,11 +29,20 @@ st.subheader("Produktion")
 plot_stacked_bar_interactive(df_monthly)
 plot_donut_with_month_selector(df_monthly)
 
+st.subheader("Zeitverlauf")
+plot_time_series(df_cleaned)
+
+plot_kpis(df_cleaned)
+
 # st.subheader("Verbrauch")
 # plot_verbrauch(df_monthly)
 
-# st.subheader("Regionale Analyse")
-# plot_kantonskarte()
+st.subheader("Regionale Analyse")
+plot_kantonskarte()
+
+# Heatmap: Import/Export/Verbrauch
+st.subheader("Import, Export und Verbrauch")
+plot_heatmap_import_export(df_cleaned)
 
 # Temperature Scatterplot
 st.subheader("Temperatur & Verbrauch")
