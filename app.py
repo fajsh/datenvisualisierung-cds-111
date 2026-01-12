@@ -6,11 +6,12 @@ from layout.header import render_header
 from plots.kpi import plot_kpis
 from plots.timeseries import plot_time_series
 from plots.heatmap import plot_heatmap_import_export
-from plots.production import plot_donut_with_month_selector, plot_stacked_bar_interactive
+from plots.production import production_plots
 from plots.temperature_scatterplot import temp_scatter
 #from plots.consumption import plot_verbrauch
 from plots.geography import plot_kantonskarte
 from state.session_state import init_state
+from plots.kpi_with_icons import render_energy_kpis
 
 st.set_page_config(
     page_title="Energy Dashboard 2025",
@@ -25,9 +26,11 @@ render_header()
 df_monthly = load_monthly_sums()
 df_cleaned = load_cleaned_dataset()
 
+st.subheader("Energy Overview")
+render_energy_kpis(df_cleaned)
+
 st.subheader("Produktion")
-plot_stacked_bar_interactive(df_monthly)
-plot_donut_with_month_selector(df_monthly)
+production_plots(df_monthly)
 
 st.subheader("Zeitverlauf")
 plot_time_series(df_cleaned)
