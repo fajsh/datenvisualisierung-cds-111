@@ -11,6 +11,7 @@ from utils.colors import (
     WASSERFUEHRUNG,
     GRAU,
     ACHSE,
+    PLOT_HINTERGRUND,
     LEGENDE_HINTERGRUND,
     TOGGLE_HINTERGRUND,
     TOGGLE_TEXT
@@ -137,7 +138,8 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
             marker=dict(
                 symbol="circle-open",
                 size=12,
-                line=dict(width=2, color=ACHSE),
+                color="#868D07",
+                line=dict(width=2, color="#868D07"),
             ),
             opacity=1.0,  # on by default
             # showlegend=True,
@@ -156,7 +158,8 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
             marker=dict(
                 symbol="circle-open",
                 size=12,
-                line=dict(width=2, color=ACHSE),
+                color="#C8C36D",
+                line=dict(width=2, color="#C8C36D"),
             ),
             opacity=1.0,
             # showlegend=True,
@@ -170,7 +173,8 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         showgrid=False,
         linecolor=ACHSE,
         linewidth=2,
-        title_font=dict(size=14),
+        title_font=dict(size=14, color=ACHSE),
+        tickfont=dict(color=ACHSE)
     )
 
     fig.update_yaxes(
@@ -180,7 +184,8 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         linecolor=ACHSE,
         linewidth=2,
         title_standoff=20,
-        title_font=dict(size=14),
+        title_font=dict(size=14, color=ACHSE),
+        tickfont=dict(color=ACHSE)
     )
 
     fig.update_yaxes(
@@ -190,7 +195,8 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         linecolor=ACHSE,
         linewidth=2,
         title_standoff=30,
-        title_font=dict(size=14),
+        title_font=dict(size=14, color=ACHSE),
+        tickfont=dict(color=ACHSE)
     )
 
     # Legend block (top-right)
@@ -201,8 +207,8 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
             xanchor="left",
             yanchor="top",
             bgcolor=LEGENDE_HINTERGRUND,
-            bordercolor="grey",
-            borderwidth=3,
+            bordercolor="black",
+            borderwidth=2,
             font=dict(size=14),
             # orientation="v",
         )
@@ -219,8 +225,10 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         y0=0.01, y1=0.42,
         # xanchor="left",
         # yanchor="top",
-        line=dict(color=ACHSE, width=3),
-        fillcolor="black",
+        line=dict(color="black", width=2),
+        fillcolor="white",
+        opacity=1,
+        layer="above"
     )
 
     # Toggle buttons
@@ -316,7 +324,8 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         template="simple_white",
         width=1000,
         height=650,
-        plot_bgcolor=LEGENDE_HINTERGRUND,
+        plot_bgcolor=PLOT_HINTERGRUND,
+        paper_bgcolor=PLOT_HINTERGRUND,
         # font=dict(
         #    family="Comic Sans MS, Patrick Hand, Arial",
         #    size=16,
