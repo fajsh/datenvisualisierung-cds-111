@@ -1,11 +1,11 @@
 
 ENERGY_COLORS = {
-    "Laufwerke":     "#4C78A8",  
-    "Speicherwerke": "#3A5D7A",  
-    "Windkraft":     "#72B7B2",  
-    "Photovoltaik":  "#EFC94C",  
-    "Kernkraftwerke": "#B279A2",  
-    "Thermisch":     "#9D9D9D" 
+    "Laufwerke":     "#768E78",  
+    "Speicherwerke": "#C6C09C",  
+    "Windkraft":     "#EBDEC0",  
+    "Photovoltaik":  "#FCC88A",  
+    "Kernkraftwerke": "#E79897",  
+    "Thermisch":     "#FCAC83" 
 }
 
 LANDESVERBRAUCH = "#CE8279"
@@ -16,4 +16,3 @@ PLOT_HINTERGRUND = "#FFFFFF"
 LEGENDE_HINTERGRUND = "#FFFFFF"
 TOGGLE_HINTERGRUND = "#E5ACB6"
 TOGGLE_TEXT = "#000000"
-
