@@ -225,7 +225,7 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         y0=0.01, y1=0.42,
         # xanchor="left",
         # yanchor="top",
-        line=dict(color="black", width=2),
+        # line=dict(color="black", width=2),
         fillcolor="white",
         opacity=1,
         layer="above"
@@ -236,15 +236,15 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         # Landesverbrauch toggle
         dict(
             type="buttons",
-            x=1.17, y=0.32, xanchor="left", yanchor="middle",
+            x=1.35, y=0.32, xanchor="center", yanchor="middle",
             bgcolor=TOGGLE_HINTERGRUND,  # toggle background
             bordercolor="black",  # toggle border
-            font=dict(color=TOGGLE_TEXT),  # toggle text
+            font=dict(color=TOGGLE_TEXT, family="Courier New", size=16),  # toggle text
             showactive=True,
             # direction="down",
             buttons=[
                 dict(
-                    label="Landesverbrauch",
+                    label="Landesverbrauch" + "\u00A0"*4,
                     method="restyle",
                     args=[{"opacity": [1.0, 0.0]}, [0, 1]],
                     args2=[{"opacity": [0.0, 0.35]}, [0, 1]],
@@ -254,10 +254,10 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         # Wasserführung Rhein toggle
         dict(
             type="buttons",
-            x=1.17, y=0.24, xanchor="left", yanchor="middle",
+            x=1.35, y=0.24, xanchor="center", yanchor="middle",
             bgcolor=TOGGLE_HINTERGRUND,  # toggle background
             bordercolor="black",  # toggle border
-            font=dict(color=TOGGLE_TEXT),  # toggle text
+            font=dict(color=TOGGLE_TEXT, family="Courier New", size=16),  # toggle text
             showactive=True,
             direction="down",
             buttons=[
@@ -272,15 +272,15 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         # Trendlines toggle
         dict(
             type="buttons",
-            x=1.17, y=0.16, xanchor="left", yanchor="middle",
+            x=1.35, y=0.16, xanchor="center", yanchor="middle",
             bgcolor=TOGGLE_HINTERGRUND,  # toggle background
             bordercolor="black",  # toggle border
-            font=dict(color=TOGGLE_TEXT),  # toggle text
+            font=dict(color=TOGGLE_TEXT, family="Courier New", size=16),  # toggle text
             showactive=True,
             # direction="down",
             buttons=[
                 dict(
-                    label="Trendlinien",
+                    label="Trendlinien" + "\u00A0"*8,
                     method="restyle",
                     args=[{"opacity": [1.0, 1.0]}, [4, 5]],
                     args2=[{"opacity": [0.0, 0.0]}, [4, 5]],
@@ -290,15 +290,15 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         # Outliers toggle
         dict(
             type="buttons",
-            x=1.17, y=0.08, xanchor="left", yanchor="middle",
+            x=1.35, y=0.08, xanchor="center", yanchor="middle",
             bgcolor=TOGGLE_HINTERGRUND,  # toggle background
             bordercolor="black",  # toggle border
-            font=dict(color=TOGGLE_TEXT),  # toggle text
+            font=dict(color=TOGGLE_TEXT, family="Courier New", size=16),  # toggle text
             showactive=True,
             # direction="down",
             buttons=[
                 dict(
-                    label="Ausreisser",
+                    label="Ausreisser" + "\u00A0"*9,
                     method="restyle",
                     args=[{"opacity": [1.0, 1.0]}, [6, 7]],
                     args2=[{"opacity": [0.0, 0.0]}, [6, 7]],
