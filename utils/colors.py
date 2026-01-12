@@ -1,17 +1,18 @@
 
 ENERGY_COLORS = {
-    "Laufwerke":     "#4C78A8",  
-    "Speicherwerke": "#3A5D7A",  
-    "Windkraft":     "#72B7B2",  
-    "Photovoltaik":  "#EFC94C",  
-    "Kernkraftwerke": "#B279A2",  
-    "Thermisch":     "#9D9D9D" 
+    "Laufwerke":     "#768E78",  
+    "Speicherwerke": "#C6C09C",  
+    "Windkraft":     "#EBDEC0",  
+    "Photovoltaik":  "#FCC88A",  
+    "Kernkraftwerke": "#E79897",  
+    "Thermisch":     "#FCAC83" 
 }
 
-LANDESVERBRAUCH = "#ffb3ba"
-WASSERFUEHRUNG = "#ffffba"
+LANDESVERBRAUCH = "#CE8279"
+WASSERFUEHRUNG = "#7F93AA"
 GRAU = "#d3d3d3"
-ACHSE = "white"
-LEGENDE_HINTERGRUND = "rgba(0,0,0,0.75)"
-TOGGLE_HINTERGRUND = "grey"
-TOGGLE_TEXT = "black"
+ACHSE = "#000000"
+PLOT_HINTERGRUND = "#FFFFFF"
+LEGENDE_HINTERGRUND = "#FFFFFF"
+TOGGLE_HINTERGRUND = "#E5ACB6"
+TOGGLE_TEXT = "#000000"

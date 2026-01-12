@@ -1,24 +1,11 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-from utils.colors import ENERGY_COLORS
 import pandas as pd
+import calendar
 import plotly.express as px
-import calendar
-import streamlit as st
 import plotly.graph_objects as go
 from utils.colors import ENERGY_COLORS
 
-
-import streamlit as st
-import plotly.graph_objects as go
-import calendar
-from utils.colors import ENERGY_COLORS
-
-
-def plot_stacked_bar_interactive(df_monthly_sums):
-    # -------------------------------------------------
-    # DATA PREP
-    # -------------------------------------------------
+def plot_stacked_bar_interactive(df_monthly_sums, selected_month):
     df = df_monthly_sums.copy()
     df = df[df['Monat'] != 'Total']
 
@@ -31,9 +18,6 @@ def plot_stacked_bar_interactive(df_monthly_sums):
         'Photovoltaik'
     ]
 
-    # -------------------------------------------------
-    # Monat-Mapping: numerisch -> Name
-    # -------------------------------------------------
     month_map = {
         f"{i:02d}": calendar.month_name[i]
         for i in range(1, 13)
@@ -41,44 +25,42 @@ def plot_stacked_bar_interactive(df_monthly_sums):
 
     df["Monat_Name"] = df["Monat"].map(month_map)
 
-    months_display = df["Monat_Name"].tolist()
+    # Filter für Balkendiagramm, falls Monat gewählt (außer "Total")
+    if selected_month != "Total":
+        df_filtered = df[df["Monat"] == selected_month]
+        months_display = [month_map[selected_month]]
+    else:
+        df_filtered = df
+        months_display = df_filtered["Monat_Name"].tolist()
 
-    # -------------------------------------------------
-    # PLOTLY STACKED BAR
-    # -------------------------------------------------
     fig = go.Figure()
 
     for source in energy_sources:
         fig.add_trace(
             go.Bar(
                 x=months_display,
-                y=df[source],
+                y=df_filtered[source],
                 name=source,
                 marker_color=ENERGY_COLORS.get(source),
                 hovertemplate=(
                     f"<b>{source}</b><br>"
-                    "Monat: %{x}<br>"
+                    "Month: %{x}<br>"
                     "%{y:.1f} GWh<extra></extra>"
                 )
             )
         )
 
     fig.update_layout(
-        title="Monatliche Energieerzeugung nach Quelle (2025)",
-        xaxis_title="Monat",
-        yaxis_title="Energieerzeugung (GWh)",
+        title="Monthly energy production by source",
+        xaxis_title="Month",
+        yaxis_title="Energy production (GWh)",
         barmode="stack",
-        legend_title_text="Energiequelle",
+        legend_title_text="Energy source",
         hovermode="x unified"
     )
-
     st.plotly_chart(fig, use_container_width=True)
 
-
-def plot_donut_with_month_selector(df_monthly_sums):
-    # -------------------------------------------------
-    # DATA PREP
-    # -------------------------------------------------
+def plot_donut(df_monthly_sums, selected_month):
     df = df_monthly_sums.copy()
 
     energy_sources = [
@@ -90,37 +72,13 @@ def plot_donut_with_month_selector(df_monthly_sums):
         'Photovoltaik'
     ]
 
-    # -------------------------------------------------
-    # Monat-Mapping: numerisch -> Name
-    # -------------------------------------------------
     month_map = {
         f"{i:02d}": calendar.month_name[i]
         for i in range(1, 13)
     }
     month_map["Total"] = "Total"
 
-    # verfügbare Monate (numerisch)
-    months_numeric = df['Monat'].tolist()
-
-    # Anzeige-Namen
-    months_display = [month_map[m] for m in months_numeric]
-
-    # -------------------------------------------------
-    # UI: Dropdown
-    # -------------------------------------------------
-    selected_display = st.selectbox(
-        "Monat wählen",
-        months_display,
-        index=months_display.index("Total") if "Total" in months_display else 0
-    )
-
-    # Rückübersetzung Display → numerisch
-    reverse_map = {v: k for k, v in month_map.items()}
-    selected_month = reverse_map[selected_display]
-
-    # -------------------------------------------------
-    # Filter für gewählten Monat
-    # -------------------------------------------------
+    # Filter für Donut
     df_selected = df[df['Monat'] == selected_month]
 
     values = df_selected[energy_sources].values.flatten()
@@ -133,9 +91,6 @@ def plot_donut_with_month_selector(df_monthly_sums):
     total = df_donut["Wert_TWh"].sum()
     df_donut["Prozent"] = (df_donut["Wert_TWh"] / total * 100).round(1)
 
-    # -------------------------------------------------
-    # DONUT (Plotly)
-    # -------------------------------------------------
     fig = px.pie(
         df_donut,
         names="Energiequelle",
@@ -153,9 +108,42 @@ def plot_donut_with_month_selector(df_monthly_sums):
         )
     )
 
-    fig.update_layout(
-        title=f"Energieerzeugung nach Quelle ({selected_display})",
-        legend_title_text="Energiequelle"
+    st.plotly_chart(fig, use_container_width=True)
+
+def production_plots(df_monthly_sums):
+    # Monat-Mapping für Dropdown
+    month_map = {
+        f"{i:02d}": calendar.month_name[i]
+        for i in range(1, 13)
+    }
+    month_map["Total"] = "Total"
+
+    months_numeric = df_monthly_sums['Monat'].tolist()
+    months_display = [month_map[m] for m in months_numeric]
+
+    # Dropdown oberhalb des Balkendiagramms
+    selected_display = st.selectbox(
+        "Choose month",
+        months_display,
+        index=months_display.index("Total") if "Total" in months_display else 0
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    reverse_map = {v: k for k, v in month_map.items()}
+    selected_month = reverse_map[selected_display]
+
+    # Balkendiagramm
+    plot_stacked_bar_interactive(df_monthly_sums, selected_month)
+
+    # Donut-Diagramm
+    plot_donut(df_monthly_sums, selected_month)
+
+
+"""
+für app.py:
+
+st.subheader("Energy Overview")
+render_energy_kpis(df_cleaned)
+
+st.subheader("Produktion")
+production_plots(df_monthly)
+"""
