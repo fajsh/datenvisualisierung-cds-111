@@ -103,8 +103,8 @@ def plot_kpis(df_cleaned):
 
     winter_text = f"{winter_avg:,.0f} GWh".replace(",", "'")
     summer_text = f"{summer_prod:,.0f} GWh".replace(",", "'")
-    peak_text = f"{peak_value:,.0f} GWh am {peak_date}".replace(",", "'")
+    peak_text = f"{peak_value:,.0f} GWh on {peak_date}".replace(",", "'")
 
-    _summary_card("Winterverbrauch (Ø)", winter_text, "#6F896F")
-    _summary_card("Sommerproduktion", summer_text, "#C9C39D")
-    _summary_card("Leistungs-Peak", peak_text, "#F2C58B")
+    _summary_card("Winter Consumption (Ø)", winter_text, "#6F896F")
+    _summary_card("Summer Production", summer_text, "#C9C39D")
+    _summary_card("Energy Peak", peak_text, "#F2C58B")

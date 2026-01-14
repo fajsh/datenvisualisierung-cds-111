@@ -32,7 +32,7 @@ def build_heatmap_import_export_fig(df_cleaned, height=320):
         columns={
             "Einfuhr": "Import",
             "Ausfuhr": "Export",
-            "Landesverbrauch": "Verbrauch",
+            "Landesverbrauch": "Consumption",
         }
     ).T
     data.columns = month_labels
@@ -53,11 +53,9 @@ def build_heatmap_import_export_fig(df_cleaned, height=320):
         text_auto=".0f",
         aspect="auto",
         color_continuous_scale=_build_colorscale(palette),
-        labels={"x": "Monat", "y": "Kategorie", "color": "GWh"},
+        labels={"x": "Month", "y": "Category", "color": "GWh"},
     )
     fig.update_layout(
-        title="Import, Export und Verbrauch pro Monat",
-        title_font={"color": "#000000"},
         margin={"l": 10, "r": 10, "t": 40, "b": 10},
         coloraxis_colorbar={"title": "GWh"},
         height=height,

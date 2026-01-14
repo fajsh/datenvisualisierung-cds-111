@@ -144,11 +144,11 @@ def get_kantonskarte_month_options(
 ):
     data_file = Path(data_path)
     if not data_file.exists():
-        return ["Gesamt"]
+        return ["Total"]
 
     df = _load_timeseries(str(data_file), sheet_name)
     if "Zeitstempel" not in df.columns:
-        return ["Gesamt"]
+        return ["Total"]
 
     df["Zeitstempel"] = pd.to_datetime(df["Zeitstempel"], dayfirst=True, errors="coerce")
     month_options = (
@@ -159,7 +159,7 @@ def get_kantonskarte_month_options(
         .unique()
     )
     month_options = sorted(month_options)
-    return ["Gesamt"] + month_options
+    return ["Total"] + month_options
 
 
 def build_kantonskarte_map(
@@ -169,7 +169,7 @@ def build_kantonskarte_map(
     metric_label="Produktion",
     split_mode="equal",
     feature_key="properties.NAME",
-    selected_month="Gesamt",
+    selected_month="Total",
 ):
     data_file = Path(data_path)
     if not data_file.exists():
@@ -182,7 +182,7 @@ def build_kantonskarte_map(
     df = _load_timeseries(str(data_file), sheet_name)
     if "Zeitstempel" in df.columns:
         df["Zeitstempel"] = pd.to_datetime(df["Zeitstempel"], dayfirst=True, errors="coerce")
-        if selected_month and selected_month != "Gesamt":
+        if selected_month and selected_month != "Total":
             df = df[df["Zeitstempel"].dt.to_period("M").astype(str) == selected_month]
 
     totals = _build_canton_totals(df, metric_label, split_mode)
@@ -213,7 +213,7 @@ def build_kantonskarte_map(
             feat["properties"]["Wert_kwh"] = display_map[name]
 
     map_center = [46.8, 8.3]
-    m = folium.Map(location=map_center, zoom_start=7, tiles="CartoDB positron")
+    m = folium.Map(location=map_center, zoom_start=7, tiles=None)
 
     palette = [
         "#768E78",
@@ -261,14 +261,18 @@ def plot_kantonskarte(
     metric_label="Produktion",
     split_mode="equal",
     feature_key="properties.NAME",
-    width=420,
-    height=260,
+    height=340,
 ):
     if metric_label is None:
         metric_label = st.selectbox("Kennzahl", ["Produktion", "Verbrauch"], index=0)
 
     month_options = get_kantonskarte_month_options(data_path=data_path, sheet_name=sheet_name)
-    selected_month = st.selectbox("Monat waehlen", month_options)
+    selected_month = selected_month = st.selectbox(
+        "Month",
+        month_options,
+        label_visibility="collapsed",
+)
+
 
     m, warning = build_kantonskarte_map(
         data_path=data_path,
@@ -285,4 +289,4 @@ def plot_kantonskarte(
     if warning:
         st.warning(warning)
 
-    st_folium(m, width=width, height=height)
+    st_folium(m, use_container_width=True, height=height)

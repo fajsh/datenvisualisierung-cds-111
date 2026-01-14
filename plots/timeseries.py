@@ -11,8 +11,8 @@ def build_time_series_fig(df_cleaned, height=320):
     metrics = {
         "Einfuhr": "Import",
         "Ausfuhr": "Export",
-        "Nettoerzeugung Total": "Nettoerzeugung",
-        "Landesverbrauch": "Landesverbrauch",
+        "Nettoerzeugung Total": "Net Production",
+        "Landesverbrauch": "National Consumption",
     }
     missing = [col for col in metrics if col not in df.columns]
     if missing:
@@ -53,8 +53,6 @@ def build_time_series_fig(df_cleaned, height=320):
         )
 
     fig.update_layout(
-        title="Zeitverlauf und Energieflussgroessen",
-        title_font={"color": "#000000"},
         xaxis_title="Monat",
         yaxis_title="kWh",
         hovermode="x unified",

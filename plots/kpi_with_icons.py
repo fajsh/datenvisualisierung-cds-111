@@ -25,12 +25,12 @@ def compute_kpis(df_monthly_sums):
 def build_energy_kpis_html(df_monthly_sums):
     kpis = compute_kpis(df_monthly_sums)
     cards = [
-        ("⚡", "Nettoverbrauch", kpis["Net production"]),
-        ("💧", "Speicherpumpenverbrauch", kpis["Pumped storage consumption"]),
-        ("🇨🇭", "Landesverbrauch", kpis["National consumption"]),
-        ("🧭", "Export", kpis["Export"]),
-        ("📥", "Import", kpis["Import"]),
-        ("🔌", "Energiebilanz", kpis["Rhine streamflow"]),
+        ("⚡", "Net production", kpis["Net production"]),
+        ("🇨🇭", "National consumption", kpis["National consumption"]),
+        ("💧", "Pumped storage consumption", kpis["Pumped storage consumption"]),
+        ("➡️", "Export", kpis["Export"]),
+        ("⬅️", "Import", kpis["Import"]),
+        ("🌊", "Rhine streamflow", kpis["Rhine streamflow"]),
     ]
     items = []
     for icon, title, value in cards:
@@ -90,11 +90,11 @@ def render_energy_kpis(df_monthly_sums):
     col1, col2 = st.columns(2)
 
     with col1:
-        _kpi_card("⚡", "Nettoverbrauch", kpis["Net production"])
-        _kpi_card("💧", "Speicherpumpenverbrauch", kpis["Pumped storage consumption"])
-        _kpi_card("🇨🇭", "Landesverbrauch", kpis["National consumption"])
-
+        _kpi_card("⚡", "Net production", kpis["Net production"])
+        _kpi_card("🇨🇭", "National consumption", kpis["National consumption"])
+        _kpi_card("💧", "Pumped storage consumption", kpis["Pumped storage consumption"])
+        
     with col2:
-        _kpi_card("🧭", "Export", kpis["Export"])
-        _kpi_card("📥", "Import", kpis["Import"])
-        _kpi_card("🔌", "Energiebilanz", kpis["Rhine streamflow"])
+        _kpi_card("➡️", "Export", kpis["Export"])
+        _kpi_card("⬅️", "Import", kpis["Import"])
+        _kpi_card("🌊", "Rhine streamflow", kpis["Rhine streamflow"])

@@ -332,15 +332,7 @@ def temp_scatter(
     # Figure layout configurations
     layout_kwargs = dict(
         showlegend=show_legend,
-        updatemenus=updatemenus if show_controls else [],
-        title=dict(
-            text="EINFLUSS DER TEMPERATUR AUF LANDESVERBRAUCH UND WASSERFÜHRUNG DES RHEINS",
-            x=0.75,
-            y=0.97,
-            xanchor="right",
-            yanchor="top",
-            font=dict(size=18 if not compact else 14, color="#000000"),
-        ),
+        updatemenus=updatemenus if show_controls else [],        
         template="simple_white",
         plot_bgcolor="#FFFFFF",
         paper_bgcolor="#FFFFFF",
