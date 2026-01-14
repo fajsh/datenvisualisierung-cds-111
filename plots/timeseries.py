@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 
-def plot_time_series(df_cleaned):
+def build_time_series_fig(df_cleaned, height=320):
     df = df_cleaned.copy()
     df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce")
     df = df.dropna(subset=["Datum"])
@@ -54,10 +54,18 @@ def plot_time_series(df_cleaned):
 
     fig.update_layout(
         title="Zeitverlauf und Energieflussgroessen",
+        title_font={"color": "#000000"},
         xaxis_title="Monat",
         yaxis_title="kWh",
         hovermode="x unified",
         margin={"l": 10, "r": 10, "t": 40, "b": 10},
+        height=height,
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
     )
+    return fig
 
+
+def plot_time_series(df_cleaned, height=320):
+    fig = build_time_series_fig(df_cleaned, height=height)
     st.plotly_chart(fig, use_container_width=True)

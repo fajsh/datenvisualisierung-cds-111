@@ -12,7 +12,7 @@ def _build_colorscale(colors):
     return [(i * step, color) for i, color in enumerate(colors)]
 
 
-def plot_heatmap_import_export(df_cleaned):
+def build_heatmap_import_export_fig(df_cleaned, height=320):
     df = df_cleaned.copy()
     df["Datum"] = pd.to_datetime(df["Datum"], errors="coerce")
     df = df.dropna(subset=["Datum"])
@@ -57,8 +57,16 @@ def plot_heatmap_import_export(df_cleaned):
     )
     fig.update_layout(
         title="Import, Export und Verbrauch pro Monat",
+        title_font={"color": "#000000"},
         margin={"l": 10, "r": 10, "t": 40, "b": 10},
         coloraxis_colorbar={"title": "GWh"},
+        height=height,
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
     )
+    return fig
 
+
+def plot_heatmap_import_export(df_cleaned, height=320):
+    fig = build_heatmap_import_export_fig(df_cleaned, height=height)
     st.plotly_chart(fig, use_container_width=True)

@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from utils.colors import ENERGY_COLORS
 
-def plot_stacked_bar_interactive(df_monthly_sums, selected_month):
+def build_stacked_bar_interactive(df_monthly_sums, selected_month, height=320):
     df = df_monthly_sums.copy()
     df = df[df['Monat'] != 'Total']
 
@@ -52,15 +52,25 @@ def plot_stacked_bar_interactive(df_monthly_sums, selected_month):
 
     fig.update_layout(
         title="Monthly energy production by source",
+        title_font={"color": "#000000"},
         xaxis_title="Month",
         yaxis_title="Energy production (GWh)",
         barmode="stack",
         legend_title_text="Energy source",
-        hovermode="x unified"
+        hovermode="x unified",
+        height=height,
+        margin={"l": 10, "r": 10, "t": 30, "b": 10},
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
     )
+    return fig
+
+
+def plot_stacked_bar_interactive(df_monthly_sums, selected_month, height=320):
+    fig = build_stacked_bar_interactive(df_monthly_sums, selected_month, height=height)
     st.plotly_chart(fig, use_container_width=True)
 
-def plot_donut(df_monthly_sums, selected_month):
+def build_donut(df_monthly_sums, selected_month, height=320):
     df = df_monthly_sums.copy()
 
     energy_sources = [
@@ -107,10 +117,22 @@ def plot_donut(df_monthly_sums, selected_month):
             "%{percent:.1%}<extra></extra>"
         )
     )
+    fig.update_layout(
+        title=None,
+        height=height,
+        margin={"l": 10, "r": 10, "t": 20, "b": 10},
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
+        title_font={"color": "#000000"},
+    )
+    return fig
 
+
+def plot_donut(df_monthly_sums, selected_month, height=320):
+    fig = build_donut(df_monthly_sums, selected_month, height=height)
     st.plotly_chart(fig, use_container_width=True)
 
-def production_plots(df_monthly_sums):
+def production_plots(df_monthly_sums, height=320):
     # Monat-Mapping für Dropdown
     month_map = {
         f"{i:02d}": calendar.month_name[i]
@@ -131,11 +153,13 @@ def production_plots(df_monthly_sums):
     reverse_map = {v: k for k, v in month_map.items()}
     selected_month = reverse_map[selected_display]
 
-    # Balkendiagramm
-    plot_stacked_bar_interactive(df_monthly_sums, selected_month)
+    col1, col2 = st.columns(2)
 
-    # Donut-Diagramm
-    plot_donut(df_monthly_sums, selected_month)
+    with col1:
+        plot_stacked_bar_interactive(df_monthly_sums, selected_month, height=height)
+
+    with col2:
+        plot_donut(df_monthly_sums, selected_month, height=height)
 
 
 """

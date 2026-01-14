@@ -138,44 +138,51 @@ def _merge_geojson_by_property(geojson_obj, feature_key):
     return {"type": "FeatureCollection", "features": list(merged.values())}
 
 
-def plot_kantonskarte(
+def get_kantonskarte_month_options(
+    data_path="data/raw/EnergieUebersichtCH-2025-2.xlsx",
+    sheet_name="Zeitreihen0h15",
+):
+    data_file = Path(data_path)
+    if not data_file.exists():
+        return ["Gesamt"]
+
+    df = _load_timeseries(str(data_file), sheet_name)
+    if "Zeitstempel" not in df.columns:
+        return ["Gesamt"]
+
+    df["Zeitstempel"] = pd.to_datetime(df["Zeitstempel"], dayfirst=True, errors="coerce")
+    month_options = (
+        df["Zeitstempel"]
+        .dropna()
+        .dt.to_period("M")
+        .astype(str)
+        .unique()
+    )
+    month_options = sorted(month_options)
+    return ["Gesamt"] + month_options
+
+
+def build_kantonskarte_map(
     data_path="data/raw/EnergieUebersichtCH-2025-2.xlsx",
     geojson_path="data/geo/swissBOUNDARIES3D_1_3_TLM_KANTONSGEBIET.geojson",
     sheet_name="Zeitreihen0h15",
     metric_label="Produktion",
     split_mode="equal",
     feature_key="properties.NAME",
+    selected_month="Gesamt",
 ):
     data_file = Path(data_path)
     if not data_file.exists():
-        st.info(f"Daten nicht gefunden: {data_file.as_posix()}")
-        return
+        return None, f"Daten nicht gefunden: {data_file.as_posix()}"
 
     geo_file = Path(geojson_path)
     if not geo_file.exists():
-        st.info(
-            "GeoJSON fehlt. Lege die Datei hier ab: "
-            f"{geo_file.as_posix()}"
-        )
-        return
-
-    if metric_label is None:
-        metric_label = st.selectbox("Kennzahl", ["Produktion", "Verbrauch"], index=0)
+        return None, f"GeoJSON fehlt: {geo_file.as_posix()}"
 
     df = _load_timeseries(str(data_file), sheet_name)
-
     if "Zeitstempel" in df.columns:
         df["Zeitstempel"] = pd.to_datetime(df["Zeitstempel"], dayfirst=True, errors="coerce")
-        month_options = (
-            df["Zeitstempel"]
-            .dropna()
-            .dt.to_period("M")
-            .astype(str)
-            .unique()
-        )
-        month_options = sorted(month_options)
-        selected_month = st.selectbox("Monat waehlen", ["Gesamt"] + month_options)
-        if selected_month != "Gesamt":
+        if selected_month and selected_month != "Gesamt":
             df = df[df["Zeitstempel"].dt.to_period("M").astype(str) == selected_month]
 
     totals = _build_canton_totals(df, metric_label, split_mode)
@@ -185,34 +192,25 @@ def plot_kantonskarte(
         geojson_obj = json.load(handle)
 
     feature_key = feature_key or _guess_feature_key(geojson_obj)
-    if not feature_key:
-        st.info("GeoJSON-Feature-Key nicht erkannt. Bitte feature_key setzen.")
-        return
+    if not feature_key or not feature_key.startswith("properties."):
+        return None, "GeoJSON-Feature-Key nicht erkannt."
 
     geojson_obj = _merge_geojson_by_property(geojson_obj, feature_key)
 
-    if feature_key.startswith("properties."):
-        prop_key = feature_key.split(".", 1)[1]
-        geo_names = {f.get("properties", {}).get(prop_key) for f in geojson_obj.get("features", [])}
-        data_names = set(totals["Kanton"].unique())
-        missing = sorted(n for n in data_names if n not in geo_names)
-        if missing:
-            st.warning("Kantone im Datensatz fehlen im GeoJSON: " + ", ".join(missing))
-    else:
-        st.info("GeoJSON-Feature-Key muss properties.<name> sein.")
-        return
+    prop_key = feature_key.split(".", 1)[1]
+    geo_names = {f.get("properties", {}).get(prop_key) for f in geojson_obj.get("features", [])}
+    data_names = set(totals["Kanton"].unique())
+    missing = sorted(n for n in data_names if n not in geo_names)
+    warning = None
+    if missing:
+        warning = "Kantone im Datensatz fehlen im GeoJSON: " + ", ".join(missing)
 
     value_map = {row["Kanton"]: row["Wert"] for _, row in totals.iterrows()}
-    display_map = {
-        k: f"{value_map[k]:,.0f}".replace(",", "'")
-        for k in value_map
-    }
-    if feature_key.startswith("properties."):
-        prop_key = feature_key.split(".", 1)[1]
-        for feat in geojson_obj.get("features", []):
-            name = feat.get("properties", {}).get(prop_key)
-            if name in display_map:
-                feat["properties"]["Wert_kwh"] = display_map[name]
+    display_map = {k: f"{value_map[k]:,.0f}".replace(",", "'") for k in value_map}
+    for feat in geojson_obj.get("features", []):
+        name = feat.get("properties", {}).get(prop_key)
+        if name in display_map:
+            feat["properties"]["Wert_kwh"] = display_map[name]
 
     map_center = [46.8, 8.3]
     m = folium.Map(location=map_center, zoom_start=7, tiles="CartoDB positron")
@@ -253,5 +251,38 @@ def plot_kantonskarte(
         sticky=False,
     )
     folium.GeoJson(geojson_obj, style_function=style_function, tooltip=tooltip).add_to(m)
+    return m, warning
 
-    st_folium(m, width=900, height=650)
+
+def plot_kantonskarte(
+    data_path="data/raw/EnergieUebersichtCH-2025-2.xlsx",
+    geojson_path="data/geo/swissBOUNDARIES3D_1_3_TLM_KANTONSGEBIET.geojson",
+    sheet_name="Zeitreihen0h15",
+    metric_label="Produktion",
+    split_mode="equal",
+    feature_key="properties.NAME",
+    width=420,
+    height=260,
+):
+    if metric_label is None:
+        metric_label = st.selectbox("Kennzahl", ["Produktion", "Verbrauch"], index=0)
+
+    month_options = get_kantonskarte_month_options(data_path=data_path, sheet_name=sheet_name)
+    selected_month = st.selectbox("Monat waehlen", month_options)
+
+    m, warning = build_kantonskarte_map(
+        data_path=data_path,
+        geojson_path=geojson_path,
+        sheet_name=sheet_name,
+        metric_label=metric_label,
+        split_mode=split_mode,
+        feature_key=feature_key,
+        selected_month=selected_month,
+    )
+    if not m:
+        st.info("Karte konnte nicht geladen werden.")
+        return
+    if warning:
+        st.warning(warning)
+
+    st_folium(m, width=width, height=height)

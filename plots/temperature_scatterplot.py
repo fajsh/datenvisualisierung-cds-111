@@ -18,7 +18,14 @@ from utils.colors import (
 )
 
 # function to build scatterplot
-def temp_scatter(df: pd.DataFrame) -> go.Figure:
+def temp_scatter(
+    df: pd.DataFrame,
+    width=1000,
+    height=650,
+    compact=False,
+    show_controls=True,
+    show_legend=True,
+) -> go.Figure:
     # Assigning column names
     x = df["Mittlere Tagestemperatur"]
     y_consumption = df["Landesverbrauch"]
@@ -199,47 +206,62 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         tickfont=dict(color=ACHSE)
     )
 
-    # Legend block (top-right)
-    fig.update_layout(
-        legend=dict(
-            x=1.15,
+    toggle_box = dict(x0=1.15, x1=1.55, y0=0.01, y1=0.42)
+    toggle_x = 1.35
+    legend_cfg = dict(
+        x=1.15,
+        y=0.98,
+        xanchor="left",
+        yanchor="top",
+        bgcolor=LEGENDE_HINTERGRUND,
+        bordercolor="black",
+        borderwidth=2,
+        font=dict(size=14),
+    )
+    toggle_font = dict(color=TOGGLE_TEXT, family="Courier New", size=16)
+
+    if compact:
+        toggle_box = dict(x0=0.67, x1=0.98, y0=0.02, y1=0.46)
+        toggle_x = 0.83
+        legend_cfg = dict(
+            x=0.02,
             y=0.98,
             xanchor="left",
             yanchor="top",
             bgcolor=LEGENDE_HINTERGRUND,
             bordercolor="black",
-            borderwidth=2,
-            font=dict(size=14),
-            # orientation="v",
+            borderwidth=1,
+            font=dict(size=11),
         )
-    )
+        toggle_font = dict(color=TOGGLE_TEXT, family="Courier New", size=11)
+
+    if show_legend:
+        fig.update_layout(legend=legend_cfg)
 
     # Legend settings
-    fig.update_layout(showlegend=True)  # switching on classical legend
+    fig.update_layout(showlegend=show_legend)
 
     # Rectangle around the toggles area
-    fig.add_shape(
-        type="rect",
-        xref="paper", yref="paper",
-        x0=1.15, x1=1.55,
-        y0=0.01, y1=0.42,
-        # xanchor="left",
-        # yanchor="top",
-        # line=dict(color="black", width=2),
-        fillcolor="white",
-        opacity=1,
-        layer="above"
-    )
+    if show_controls:
+        fig.add_shape(
+            type="rect",
+            xref="paper", yref="paper",
+            x0=toggle_box["x0"], x1=toggle_box["x1"],
+            y0=toggle_box["y0"], y1=toggle_box["y1"],
+            fillcolor="white",
+            opacity=1,
+            layer="above"
+        )
 
     # Toggle buttons
     updatemenus = [
         # Landesverbrauch toggle
         dict(
             type="buttons",
-            x=1.35, y=0.32, xanchor="center", yanchor="middle",
+            x=toggle_x, y=0.32, xanchor="center", yanchor="middle",
             bgcolor=TOGGLE_HINTERGRUND,  # toggle background
             bordercolor="black",  # toggle border
-            font=dict(color=TOGGLE_TEXT, family="Courier New", size=16),  # toggle text
+            font=toggle_font,  # toggle text
             showactive=True,
             # direction="down",
             buttons=[
@@ -254,10 +276,10 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         # Wasserführung Rhein toggle
         dict(
             type="buttons",
-            x=1.35, y=0.24, xanchor="center", yanchor="middle",
+            x=toggle_x, y=0.24, xanchor="center", yanchor="middle",
             bgcolor=TOGGLE_HINTERGRUND,  # toggle background
             bordercolor="black",  # toggle border
-            font=dict(color=TOGGLE_TEXT, family="Courier New", size=16),  # toggle text
+            font=toggle_font,  # toggle text
             showactive=True,
             direction="down",
             buttons=[
@@ -272,10 +294,10 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         # Trendlines toggle
         dict(
             type="buttons",
-            x=1.35, y=0.16, xanchor="center", yanchor="middle",
+            x=toggle_x, y=0.16, xanchor="center", yanchor="middle",
             bgcolor=TOGGLE_HINTERGRUND,  # toggle background
             bordercolor="black",  # toggle border
-            font=dict(color=TOGGLE_TEXT, family="Courier New", size=16),  # toggle text
+            font=toggle_font,  # toggle text
             showactive=True,
             # direction="down",
             buttons=[
@@ -290,10 +312,10 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
         # Outliers toggle
         dict(
             type="buttons",
-            x=1.35, y=0.08, xanchor="center", yanchor="middle",
+            x=toggle_x, y=0.08, xanchor="center", yanchor="middle",
             bgcolor=TOGGLE_HINTERGRUND,  # toggle background
             bordercolor="black",  # toggle border
-            font=dict(color=TOGGLE_TEXT, family="Courier New", size=16),  # toggle text
+            font=toggle_font,  # toggle text
             showactive=True,
             # direction="down",
             buttons=[
@@ -308,28 +330,28 @@ def temp_scatter(df: pd.DataFrame) -> go.Figure:
     ]
 
     # Figure layout configurations
-    fig.update_layout(
-        showlegend=True,
-        updatemenus=updatemenus,
-        # title configurations
+    layout_kwargs = dict(
+        showlegend=show_legend,
+        updatemenus=updatemenus if show_controls else [],
         title=dict(
             text="EINFLUSS DER TEMPERATUR AUF LANDESVERBRAUCH UND WASSERFÜHRUNG DES RHEINS",
             x=0.75,
             y=0.97,
             xanchor="right",
             yanchor="top",
-            font=dict(size=18)
+            font=dict(size=18 if not compact else 14, color="#000000"),
         ),
-        # plot configurations
         template="simple_white",
-        width=1000,
-        height=650,
-        plot_bgcolor=PLOT_HINTERGRUND,
-        paper_bgcolor=PLOT_HINTERGRUND,
-        # font=dict(
-        #    family="Comic Sans MS, Patrick Hand, Arial",
-        #    size=16,
-        #),
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
         margin=dict(l=120, r=360, t=80, b=80),
     )
+    if compact:
+        layout_kwargs["margin"] = dict(l=80, r=40, t=60, b=60)
+    if width is not None:
+        layout_kwargs["width"] = width
+    if height is not None:
+        layout_kwargs["height"] = height
+
+    fig.update_layout(**layout_kwargs)
     return fig
