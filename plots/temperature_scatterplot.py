@@ -190,7 +190,7 @@ def temp_scatter(
 
     # Axes styling (x, and 2 y axes)
     fig.update_xaxes(
-        title_text="MITTLERE TAGESTEMPERATUR (°C) - Basel/Bern/Lausanne/Zürich",
+        title_text="Average Daily Temperatures (°C) - Basel/Bern/Lausanne/Zurich",
         zeroline=False,
         showgrid=False,
         linecolor=ACHSE,
@@ -200,7 +200,7 @@ def temp_scatter(
     )
 
     fig.update_yaxes(
-        title_text="LANDESVERBRAUCH (GWh)",
+        title_text="National Consumption (GWh)",
         secondary_y=False,
         showgrid=False,
         linecolor=ACHSE,
@@ -211,7 +211,7 @@ def temp_scatter(
     )
 
     fig.update_yaxes(
-        title_text="WASSERFÜHRUNG RHEIN (m³/s)",
+        title_text="Rhine River Flow (m³/s)",
         secondary_y=True,
         showgrid=False,
         linecolor=ACHSE,
