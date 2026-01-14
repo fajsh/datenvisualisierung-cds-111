@@ -339,7 +339,7 @@ def temp_scatter(
         margin=dict(l=120, r=360, t=80, b=80),
     )
     if compact:
-        layout_kwargs["margin"] = dict(l=80, r=40, t=60, b=60)
+        layout_kwargs["margin"] = dict(l=70, r=140, t=50, b=90)
     if width is not None:
         layout_kwargs["width"] = width
     if height is not None:
