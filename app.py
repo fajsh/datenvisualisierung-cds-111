@@ -19,6 +19,36 @@ st.set_page_config(
     page_title="Energy Dashboard 2025",
     layout="wide"
 )
+# layout fix
+st.markdown(
+    """
+<style>
+/* Make checkbox rows smaller without negative margin overlap */
+div[data-testid="stCheckbox"]{
+  transform: scale(0.85);
+  transform-origin: left center;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Remove built-in padding/min-height that creates tall rows */
+div[data-testid="stCheckbox"] label{
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  line-height: 1.0 !important;
+}
+
+/* If Streamlit adds vertical spacing between elements in a block */
+div[data-testid="stVerticalBlock"]{
+  gap: 0.25rem !important;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
 
 init_state()
 apply_compact_layout()
@@ -55,40 +85,48 @@ with top_right:
     with st.container(border=True):
         st.markdown("**Impact of temperature on national electricity consumption and Rhine river flow**")
 
-        def legend_toggle(label: str, color: str, key:str, default=True, marker="dot"):
+
+        def legend_toggle(label: str, color: str, key: str, default=True, marker="dot"):
             c_marker, c_label, c_toggle = st.columns([0.10, 0.72, 0.18], vertical_alignment="center", gap="small")
 
             with c_marker:
                 if marker == "line":
                     st.markdown(
-                    f"<div style='width:16px;height:2px;background:{color};border-radius:2px;margin-top:8px;'></div>",
-                    unsafe_allow_html=True,
-                )
+                        f"<div style='width:16px;height:2px;background:{color};border-radius:2px;margin-top:8px;'></div>",
+                        unsafe_allow_html=True,
+                    )
                 else:
-                    st.markdown(f"<div style='width:9px;height:9px;border-radius:50%;background:{color};margin-top:6px;'></div>",
-                    unsafe_allow_html=True,
-                )
+                    st.markdown(
+                        f"<div style='width:9px;height:9px;border-radius:50%;background:{color};margin-top:6px;'></div>",
+                        unsafe_allow_html=True,
+                    )
 
             with c_label:
                 st.markdown(
-                    f"<div style='font-size:0.72rem;line-height:1.1;margin:0;padding:0;'>{label}</div>",
+                    f"<div style='font-size:0.72rem;line-height:1.0;margin:0;padding:0;'>{label}</div>",
                     unsafe_allow_html=True,
                 )
 
             with c_toggle:
-                return st.checkbox("", value=default, key=key)
+                return st.checkbox("", value=default, key=key, label_visibility="collapsed")
+
+
+
+        # Wrap the toggle/legend stack to scope CSS compression
+        st.markdown('<div class="legend-panel">', unsafe_allow_html=True)
 
         show_cons = legend_toggle("National consumption", LANDESVERBRAUCH, "dl_cons", marker="dot")
         show_rhine = legend_toggle("Rhine river flow", WASSERFUEHRUNG, "dl_rhine", marker="dot")
-        show_trend_cons = legend_toggle("Trend line (national consumption)", LANDESVERBRAUCH, "dl_trend_cons", marker="line")
-        show_trend_rhine = legend_toggle("Trend line (Rhine river flow)", WASSERFUEHRUNG, "dl_trend_rhine", marker="line")
+        show_trend_cons = legend_toggle(
+            "Trend line (national consumption)", LANDESVERBRAUCH, "dl_trend_cons", marker="line"
+        )
+        show_trend_rhine = legend_toggle(
+            "Trend line (Rhine river flow)", WASSERFUEHRUNG, "dl_trend_rhine", marker="line"
+        )
         show_out_cons = legend_toggle("Outliers - national consumption", "#868D07", "dl_out_cons", marker="dot")
         show_out_rhine = legend_toggle("Outliers - Rhine", "#C8C36D", "dl_out_rhine", marker="dot")
 
-    # with st.container(border=True):
-    #    st.markdown(
-    #        "**Impact of temperature on national electricity consumption and Rhine river flow**"
-    #    )
+        st.markdown("</div>", unsafe_allow_html=True)
 
         fig_temp = temp_scatter(
             df_cleaned,
