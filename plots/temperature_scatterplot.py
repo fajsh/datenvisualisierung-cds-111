@@ -26,6 +26,7 @@ def temp_scatter(
     show_controls=True,
     show_legend=True,
 ) -> go.Figure:
+    axis_lw = 1.5 if compact else 2
     # Assigning column names
     x = df["Mittlere Tagestemperatur"]
     y_consumption = df["Landesverbrauch"]
@@ -53,13 +54,20 @@ def temp_scatter(
             y=y_consumption[~cons_outlier_mask],
             mode="markers",
             name="Landesverbrauch",
-            # legendgroup="cons",
-            marker=dict(color=LANDESVERBRAUCH, size=9  # ,line=dict(width=1, color=axis_color)
-                        ),
-            opacity=1.0,  # on by default
-            # showlegend=True,
+            marker=dict(
+                color=LANDESVERBRAUCH,
+                size=9,
+                line=dict(width=1, color="white"),
+            ),
+            hovertemplate=(
+                "Temp: %{x:.1f} °C<br>"
+                "Verbrauch: %{y:.0f} GWh"
+                "<extra></extra>"
+            ),
+            opacity=1.0,
         ),
-        secondary_y=False)  # trace 0
+        secondary_y=False
+    )
 
     # Scatter dots: Landesverbrauch (grey background when off)
     fig.add_trace(
@@ -83,13 +91,20 @@ def temp_scatter(
             y=y_rhine[~rhine_outlier_mask],
             mode="markers",
             name="Wasserführung Rhein",
-            # legendgroup="rhine",
-            marker=dict(color=WASSERFUEHRUNG, size=9  # , line=dict(width=1, color=axis_color)
-                        ),
-            opacity=1.0,  # on by default
-            # showlegend=True,
+            marker=dict(
+                color=WASSERFUEHRUNG,
+                size=9,
+                line=dict(width=1, color="white"),
+            ),
+            hovertemplate=(
+                "Temp: %{x:.1f} °C<br>"
+                "Rhein: %{y:.0f} m³/s"
+                "<extra></extra>"
+            ),
+            opacity=1.0,
         ),
-        secondary_y=True)  # trace 2
+        secondary_y=True
+    )
 
     # Scatter dots: Wasserführung Rhein (grey when off)
     fig.add_trace(
@@ -175,34 +190,34 @@ def temp_scatter(
 
     # Axes styling (x, and 2 y axes)
     fig.update_xaxes(
-        title_text="MITTLERE TAGESTEMPERATUR BASEL, BERN, LAUSANNE, ZÜRICH (°C)",
+        title_text="Average Daily Temperatures (°C) - Basel/Bern/Lausanne/Zurich",
         zeroline=False,
         showgrid=False,
         linecolor=ACHSE,
         linewidth=2,
-        title_font=dict(size=14, color=ACHSE),
+        title_font=dict(size=12, color=ACHSE),
         tickfont=dict(color=ACHSE)
     )
 
     fig.update_yaxes(
-        title_text="LANDESVERBRAUCH (GWh)",
+        title_text="National Consumption (GWh)",
         secondary_y=False,
         showgrid=False,
         linecolor=ACHSE,
         linewidth=2,
-        title_standoff=20,
-        title_font=dict(size=14, color=ACHSE),
+        title_standoff=18,
+        title_font=dict(size=11, color=ACHSE),
         tickfont=dict(color=ACHSE)
     )
 
     fig.update_yaxes(
-        title_text="WASSERFÜHRUNG RHEIN IN RHEINFELDEN TAGESMITTEL (m³/s)",
+        title_text="Rhine River Flow (m³/s)",
         secondary_y=True,
         showgrid=False,
         linecolor=ACHSE,
         linewidth=2,
-        title_standoff=30,
-        title_font=dict(size=14, color=ACHSE),
+        title_standoff=8,
+        title_font=dict(size=11, color=ACHSE),
         tickfont=dict(color=ACHSE)
     )
 
@@ -336,10 +351,11 @@ def temp_scatter(
         template="simple_white",
         plot_bgcolor="#FFFFFF",
         paper_bgcolor="#FFFFFF",
+        autosize=True,
         margin=dict(l=120, r=360, t=80, b=80),
     )
     if compact:
-        layout_kwargs["margin"] = dict(l=80, r=40, t=60, b=60)
+        layout_kwargs["margin"] = dict(l=60, r=90, t=30, b=70)
     if width is not None:
         layout_kwargs["width"] = width
     if height is not None:
