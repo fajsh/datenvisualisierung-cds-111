@@ -29,9 +29,10 @@ df_monthly = load_monthly_sums()
 df_cleaned = load_cleaned_dataset()
 
 scale = st.session_state.get("plot_scale", 0.9)
-prod_height = int(220 * scale)
+prod_height = int(190 * scale)
 time_height = int(200 * scale)
-heat_height = int(200 * scale)
+heat_height = prod_height
+heat_container_height = int(80 * scale)
 map_width = int(400 * scale)
 map_height = int(220 * scale)
 temp_height = int(200 * scale)
@@ -90,7 +91,7 @@ with top_right:
 # ─────────────────────────────────────────────
 # MIDDLE ROW
 # ─────────────────────────────────────────────
-mid_left, mid_right = st.columns([2.2, 1], gap="small")
+mid_left, mid_right = st.columns([1.6, 1.7], gap="small")
 
 with mid_left:
     with st.container(border=True):
@@ -126,7 +127,12 @@ with mid_left:
 with mid_right:
     with st.container(border=True):
         st.markdown("### Import, Export and Consumption")
+        st.markdown(
+            f"<div class='heatmap-card' style='min-height:{heat_container_height}px;'>",
+            unsafe_allow_html=True,
+        )
         plot_heatmap_import_export(df_cleaned, height=heat_height)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # BOTTOM ROW
