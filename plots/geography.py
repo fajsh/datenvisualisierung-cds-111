@@ -216,14 +216,17 @@ def build_kantonskarte_map(
     m = folium.Map(location=map_center, zoom_start=7, tiles=None)
 
     palette = [
-        "#768E78",
-        "#C6C09C",
-        "#EBDEC0",
-        "#E79897",
-        "#FCAC83",
-        "#FCC88A",
-        "#E0C1A6",
-        "#8096AD",
+        "#EFF6EF",
+        "#D4E5D2",
+        "#B8D4B5",
+        "#9CC398",
+        "#85B581",
+        "#64A15E",
+        "#52844D",
+        "#40673C",
+        "#2E4A2B",
+        "#1C2D1A",
+        "#0A1009",
     ]
     colormap = LinearColormap(
         palette,
@@ -267,11 +270,12 @@ def plot_kantonskarte(
         metric_label = st.selectbox("Kennzahl", ["Produktion", "Verbrauch"], index=0)
 
     month_options = get_kantonskarte_month_options(data_path=data_path, sheet_name=sheet_name)
-    selected_month = selected_month = st.selectbox(
+
+    selected_month = st.selectbox(
         "Month",
         month_options,
         label_visibility="collapsed",
-)
+    )
 
 
     m, warning = build_kantonskarte_map(

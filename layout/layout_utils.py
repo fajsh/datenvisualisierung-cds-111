@@ -18,20 +18,24 @@ def apply_compact_layout():
         }
 
         /* Card container */
-        [data-testid="stContainer"] {
-            background-color: #FFFFFF;
+        [data-testid="stContainer"],
+        .stContainer {
+            background-color: #FFFFFF !important;
             border-radius: 16px;
-            border: none;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            border: 1px solid #111111;
+            box-shadow: none;
         }
 
         /* Inner content – NO extra border */
-        [data-testid="stContainer"] > div {
+        [data-testid="stContainer"] > div,
+        .stContainer > div,
+        [data-testid="stContainer"] > div > div {
             padding: 0.6rem 0.7rem;
             border-radius: 16px;
-            background-color: #FFFFFF;
+            background-color: #FFFFFF !important;
             border: none;
         }
+
 
         /* Typography */
         h1, h2, h3 {

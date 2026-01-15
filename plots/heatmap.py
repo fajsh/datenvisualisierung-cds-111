@@ -37,17 +37,17 @@ def build_heatmap_import_export_fig(df_cleaned, height=320):
     )
 
     palette = [
-        "#F1F4F1",
-        "#D8DFD8",
-        "#BECABF",
-        "#A5B6A7",
-        "#8CA18E",
-        "#768E78",
-        "#5E7360",
-        "#495A4B",
-        "#354136",
-        "#202721",
-        "#0B0E0C",
+        "#F3F1F4",
+        "#DDD7DF",
+        "#C7BECB",
+        "#B0A4B6",
+        "#9A8BA2",
+        "#7A6883",
+        "#6C5D74",
+        "#55495B",
+        "#3D3441",
+        "#252028",
+        "#0D0B0E",
     ]
 
     categories = df_long["Category"].unique().tolist()
@@ -57,15 +57,15 @@ def build_heatmap_import_export_fig(df_cleaned, height=320):
     cell_size = max(12, int(height / max_rows))
 
     base = alt.Chart(df_long).mark_rect(cornerRadius=2).encode(
-        x=alt.X("Month:O", title="Month"),
-        y=alt.Y("Category:O", title="Category"),
+        x=alt.X("Month:O", title="Month", sort=month_labels),
+        y=alt.Y("Category:O", title="Category", sort=categories),
         color=alt.Color("GWh:Q", scale=alt.Scale(range=palette)),
         tooltip=["Category", "Month", "GWh"],
     )
 
     text = alt.Chart(df_long).mark_text(fontSize=11, color="#000000").encode(
-        x="Month:O",
-        y="Category:O",
+        x=alt.X("Month:O", sort=month_labels),
+        y=alt.Y("Category:O", sort=categories),
         text=alt.Text("GWh:Q", format=".0f"),
     )
 

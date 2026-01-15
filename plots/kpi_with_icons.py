@@ -66,12 +66,15 @@ def _kpi_card(icon, title, value, unit="GWh"):
             padding: 0.4rem 0.5rem;
             border-radius: 10px;
             background-color: #FFFFFF;
+            min-height: 64px;
+            width: 100%;
+            box-sizing: border-box;
             margin-bottom: 0.4rem;
         ">
             <span style="font-size: 1.2rem; width: 1.6rem; text-align: center;">{icon}</span>
             <div>
-                <div style="font-size: 0.8rem; font-weight: 600;">{title}</div>
-                <div style="font-size: 0.75rem; opacity: 0.75;">{value:.1f} {unit}</div>
+                <div style="font-size: 0.8rem; font-weight: 600; line-height: 1.2;">{title}</div>
+                <div style="font-size: 0.75rem; opacity: 0.75; line-height: 1.2;">{value:.1f} {unit}</div>
             </div>
         </div>
         """,
@@ -87,14 +90,16 @@ def render_energy_kpis(df_monthly_sums):
 
     kpis = compute_kpis(df_monthly_sums)
 
-    col1, col2 = st.columns(2)
-
-    with col1:
+    cols = st.columns(6)
+    with cols[0]:
         _kpi_card("⚡", "Net production", kpis["Net production"])
+    with cols[1]:
         _kpi_card("🇨🇭", "National consumption", kpis["National consumption"])
+    with cols[2]:
         _kpi_card("💧", "Pumped storage consumption", kpis["Pumped storage consumption"])
-        
-    with col2:
+    with cols[3]:
         _kpi_card("➡️", "Export", kpis["Export"])
+    with cols[4]:
         _kpi_card("⬅️", "Import", kpis["Import"])
+    with cols[5]:
         _kpi_card("🌊", "Rhine streamflow", kpis["Rhine streamflow"])

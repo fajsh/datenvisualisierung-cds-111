@@ -26,11 +26,11 @@ def build_time_series_fig(df_cleaned, height=320):
     month_labels = [d.strftime("%b") for d in monthly.index]
 
     palette = [
-        "#768E78",
-        "#C6C09C",
-        "#EBDEC0",
-        "#E79897",
-        "#FCAC83",
+        "#83686F",
+        "#A76E7D",
+        "#ECDAC7",
+        "#E18262",
+        "#F69E6C",
         "#FCC88A",
         "#E0C1A6",
         "#8096AD",

@@ -60,7 +60,7 @@ scale = st.session_state.get("plot_scale", 0.9)
 prod_height = int(190 * scale)
 time_height = int(200 * scale)
 heat_height = prod_height
-heat_container_height = int(80 * scale)
+heat_container_height = int(138 * scale)
 map_width = int(400 * scale)
 map_height = int(220 * scale)
 temp_height = int(260 * scale)
@@ -68,22 +68,23 @@ temp_height = int(260 * scale)
 # ─────────────────────────────────────────────
 # TOP ROW
 # ─────────────────────────────────────────────
-top_left, top_mid, top_right = st.columns([1.2, 1.6, 1.2], gap="small")
+with st.container(border=True):
+    st.markdown("**Energy Overview**")
+    render_energy_kpis(df_cleaned)
 
-with top_left:
-    with st.container(border=True):
-        st.markdown("**Energy Overview**")
-        render_energy_kpis(df_cleaned)
+# ─────────────────────────────────────────────
+# BELOW KPI ROW
+# ─────────────────────────────────────────────
+kpi_left, kpi_right = st.columns([1.6, 1.2], gap="small")
 
-with top_mid:
+with kpi_left:
     with st.container(border=True):
         st.markdown("**Regional Analysis**")
         plot_kantonskarte()
 
-with top_right:
+with kpi_right:
     with st.container(border=True):
         st.markdown("**Impact of temperature on national electricity consumption and Rhine river flow**")
-
 
         def legend_toggle(label: str, color: str, key: str, default=True, marker="dot"):
             c_marker, c_label, c_toggle = st.columns([0.10, 0.72, 0.18], vertical_alignment="center", gap="small")
@@ -108,8 +109,6 @@ with top_right:
 
             with c_toggle:
                 return st.checkbox("", value=default, key=key, label_visibility="collapsed")
-
-
 
         # Wrap the toggle/legend stack to scope CSS compression
         st.markdown('<div class="legend-panel">', unsafe_allow_html=True)
