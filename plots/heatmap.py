@@ -1,15 +1,8 @@
 import calendar
 
+import altair as alt
 import pandas as pd
-import plotly.express as px
 import streamlit as st
-
-
-def _build_colorscale(colors):
-    if len(colors) == 1:
-        return [(0.0, colors[0]), (1.0, colors[0])]
-    step = 1 / (len(colors) - 1)
-    return [(i * step, color) for i, color in enumerate(colors)]
 
 
 def build_heatmap_import_export_fig(df_cleaned, height=320):
@@ -37,34 +30,57 @@ def build_heatmap_import_export_fig(df_cleaned, height=320):
     ).T
     data.columns = month_labels
 
+    df_long = (
+        data.reset_index()
+        .melt(id_vars="index", var_name="Month", value_name="GWh")
+        .rename(columns={"index": "Category"})
+    )
+
     palette = [
+        "#F1F4F1",
+        "#D8DFD8",
+        "#BECABF",
+        "#A5B6A7",
+        "#8CA18E",
         "#768E78",
-        "#C6C09C",
-        "#EBDEC0",
-        "#E79897",
-        "#FCAC83",
-        "#FCC88A",
-        "#E0C1A6",
-        "#8096AD",
+        "#5E7360",
+        "#495A4B",
+        "#354136",
+        "#202721",
+        "#0B0E0C",
     ]
 
-    fig = px.imshow(
-        data,
-        text_auto=".0f",
-        aspect="auto",
-        color_continuous_scale=_build_colorscale(palette),
-        labels={"x": "Month", "y": "Category", "color": "GWh"},
+    categories = df_long["Category"].unique().tolist()
+    months = df_long["Month"].unique().tolist()
+    max_rows = max(len(categories), 1)
+    max_cols = max(len(months), 1)
+    cell_size = max(12, int(height / max_rows))
+
+    base = alt.Chart(df_long).mark_rect(cornerRadius=2).encode(
+        x=alt.X("Month:O", title="Month"),
+        y=alt.Y("Category:O", title="Category"),
+        color=alt.Color("GWh:Q", scale=alt.Scale(range=palette)),
+        tooltip=["Category", "Month", "GWh"],
     )
-    fig.update_layout(
-        margin={"l": 10, "r": 10, "t": 40, "b": 10},
-        coloraxis_colorbar={"title": "GWh"},
-        height=height,
-        plot_bgcolor="#FFFFFF",
-        paper_bgcolor="#FFFFFF",
+
+    text = alt.Chart(df_long).mark_text(fontSize=11, color="#000000").encode(
+        x="Month:O",
+        y="Category:O",
+        text=alt.Text("GWh:Q", format=".0f"),
     )
-    return fig
+
+    return (
+        alt.layer(base, text)
+        .properties(
+            width=cell_size * max_cols,
+            height=cell_size * max_rows,
+        )
+        .configure_view(strokeWidth=0, fill="transparent")
+        .configure(background="transparent")
+        .configure_axis(labelColor="#000000", titleColor="#000000")
+    )
 
 
 def plot_heatmap_import_export(df_cleaned, height=320):
-    fig = build_heatmap_import_export_fig(df_cleaned, height=height)
-    st.plotly_chart(fig, use_container_width=True)
+    chart = build_heatmap_import_export_fig(df_cleaned, height=height)
+    st.altair_chart(chart, use_container_width=True)
