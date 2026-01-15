@@ -188,7 +188,9 @@ def temp_scatter(
         ),
         secondary_y=True)  # trace 7
 
-    # Axes styling (x, and 2 y axes)
+    # Axes styling (x, and 2 y axes) - dual
+
+    # average daily temperature axis (x-axis)
     fig.update_xaxes(
         title_text="Average Daily Temperatures (°C) - Basel/Bern/Lausanne/Zurich",
         zeroline=False,
@@ -199,6 +201,7 @@ def temp_scatter(
         tickfont=dict(color=ACHSE)
     )
 
+    # national consumption axis (1st y-axis)
     fig.update_yaxes(
         title_text="National Consumption (GWh)",
         secondary_y=False,
@@ -210,6 +213,7 @@ def temp_scatter(
         tickfont=dict(color=ACHSE)
     )
 
+    # rhine river flow axis (2nd y-axis)
     fig.update_yaxes(
         title_text="Rhine River Flow (m³/s)",
         secondary_y=True,
@@ -221,6 +225,7 @@ def temp_scatter(
         tickfont=dict(color=ACHSE)
     )
 
+    # toggle configurations
     toggle_box = dict(x0=1.15, x1=1.55, y0=0.01, y1=0.42)
     toggle_x = 1.35
     legend_cfg = dict(
@@ -235,6 +240,7 @@ def temp_scatter(
     )
     toggle_font = dict(color=TOGGLE_TEXT, family="Courier New", size=16)
 
+    # making the toggle box compact to match with the rest of the plots
     if compact:
         toggle_box = dict(x0=0.67, x1=0.98, y0=0.02, y1=0.46)
         toggle_x = 0.83
@@ -250,13 +256,14 @@ def temp_scatter(
         )
         toggle_font = dict(color=TOGGLE_TEXT, family="Courier New", size=11)
 
+    # show legend
     if show_legend:
         fig.update_layout(legend=legend_cfg)
 
     # Legend settings
     fig.update_layout(showlegend=show_legend)
 
-    # Rectangle around the toggles area
+    # Rectangle around the toggles area (old code)
     if show_controls:
         fig.add_shape(
             type="rect",
@@ -268,7 +275,7 @@ def temp_scatter(
             layer="above"
         )
 
-    # Toggle buttons
+    # Toggle buttons (old code)
     updatemenus = [
         # Landesverbrauch toggle
         dict(
@@ -288,7 +295,7 @@ def temp_scatter(
                 )
             ],
         ),
-        # Wasserführung Rhein toggle
+        # Wasserführung Rhein toggle (old code)
         dict(
             type="buttons",
             x=toggle_x, y=0.24, xanchor="center", yanchor="middle",
@@ -306,7 +313,7 @@ def temp_scatter(
                 )
             ],
         ),
-        # Trendlines toggle
+        # Trendlines toggle (old code)
         dict(
             type="buttons",
             x=toggle_x, y=0.16, xanchor="center", yanchor="middle",
