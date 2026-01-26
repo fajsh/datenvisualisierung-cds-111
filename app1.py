@@ -14,6 +14,37 @@ from state.session_state import init_state
 from plots.kpi_with_icons import render_energy_kpis
 from utils.colors import LANDESVERBRAUCH, WASSERFUEHRUNG
 
+#----------------------------------
+# SET  BACKGROUND COLORS
+#----------------------------------
+
+# App Background
+
+
+css = """
+.st-key-container1{
+    background: #FFFFFF;
+}
+.st-key-container2{
+    background: #FFFFFF;
+}
+.st-key-container3{
+    background: #FFFFFF;
+}
+.st-key-container4{
+    background: #FFFFFF;
+}
+.st-key-container5{
+    background: #FFFFFF;
+}
+.st-key-container6{
+    background: #FFFFFF;
+}
+
+"""
+st.html(f"<style>{css}</style>")
+
+#----------------------------------
 
 st.set_page_config(
     page_title="Energy Dashboard 2025",
@@ -66,23 +97,27 @@ map_height = int(220 * scale)
 temp_height = int(260 * scale)
 
 # ─────────────────────────────────────────────
-# TOP ROW
+# KPI ROW
 # ─────────────────────────────────────────────
-with st.container(border=True):
+with st.container(key="container1",border=True):
     render_energy_kpis(df_cleaned)
 
 # ─────────────────────────────────────────────
-# BELOW KPI ROW
+# REST ROW
 # ─────────────────────────────────────────────
-kpi_left, kpi_right = st.columns([1.6, 1.2], gap="small")
 
-with kpi_left:
-    with st.container(border=True):
+col1, col2 = st.columns([1.6, 1.2], gap="small")
+
+## ─────────────────────────────────────────────
+# COLUMN LEFT
+## ─────────────────────────────────────────────
+
+with col1:
+    with st.container(key="container2",border=True):
         st.markdown("##### Regional Analysis")
-        plot_kantonskarte()
+        plot_kantonskarte()       
 
-with kpi_right:
-    with st.container(border=True):
+    with st.container(key="container3",border=True):
         st.markdown("##### Impact of temperature on national electricity consumption and Rhine river flow ")
 
         def legend_toggle(label: str, color: str, key: str, default=True, marker="dot"):
@@ -148,62 +183,43 @@ with kpi_right:
 
         st.plotly_chart(fig_temp, use_container_width=True)
 
-# ─────────────────────────────────────────────
-# MIDDLE ROW
-# ─────────────────────────────────────────────
-mid_left, mid_right = st.columns([1.6, 1.7], gap="small")
+## ─────────────────────────────────────────────
+# COLUMN RIGHT
+## ─────────────────────────────────────────────
 
-with mid_left:
-    with st.container(border=True):
+with col2:
+    with st.container(key="container4",border=True):
         st.markdown("##### Production")
 
         selected_month = st.selectbox(
-            "Choose month",
+            "Month",
+            label_visibility = 'collapsed',
             options=["Total"] + sorted(df_monthly["Monat"].unique().tolist()),
             index=0,
             key="prod_month",
         )
 
-        bar_col, donut_col = st.columns([1.4, 1])
-
-        with bar_col:
-            production_plots(
-                df_monthly,
-                height=prod_height,
-                selected_month=selected_month,
-                show_bar=True,
-                show_donut=False,
-            )
-
-        with donut_col:
-            production_plots(
-                df_monthly,
-                height=prod_height,
-                selected_month=selected_month,
-                show_bar=False,
-                show_donut=True,
-            )
-
-with mid_right:
-    with st.container(border=True):
-        st.markdown("##### Import, Export and Consumption")
-        st.markdown(
-            f"<div class='heatmap-card' style='min-height:{heat_container_height}px;'>",
-            unsafe_allow_html=True,
+        production_plots(
+            df_monthly,
+            height=prod_height,
+            selected_month=selected_month,
+            show_bar=True,
+            show_donut=False,
         )
+
+        production_plots(
+            df_monthly,
+            height=prod_height,
+            selected_month=selected_month,
+            show_bar=False,
+            show_donut=True,
+        )
+
+    with st.container(key="container5",border=True):
+        st.markdown("##### Import, Export and Consumption")
         plot_heatmap_import_export(df_cleaned, height=heat_height)
         st.markdown("</div>", unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────
-# BOTTOM ROW
-# ─────────────────────────────────────────────
-bottom_left, bottom_right = st.columns([3, 1.2], gap="small")
-
-with bottom_left:
-    with st.container(border=True):
+    with st.container(key="container6",border=True):
         st.markdown("##### Time Series and Energy Flow Metrics")
         plot_time_series(df_cleaned, height=time_height)
-
-with bottom_left:
-    with st.container(border=False):
-        st.markdown("")

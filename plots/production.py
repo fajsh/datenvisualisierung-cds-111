@@ -84,13 +84,20 @@ def production_plots(
     # DONUT CHART
     # -----------------------------
     if show_donut:
-        df_donut = df[df["Monat"] == selected_month]
+        if selected_month == "Total":
+            df_donut = df[df["Monat"] == "Total"]
+        else:
+            df_donut = df[df["Monat"] != "Total"].copy()
+            df_donut["Monat_Name"] = df_donut["Monat"].map(month_map)
+            df_donut = df_donut[df_donut["Monat_Name"] == selected_month]
 
         if df_donut.empty:
             st.warning("No data available for selected month.")
             return
 
-        values = df_donut[ENERGY_SOURCES].values.flatten()
+        # Werte der einen Zeile extrahieren (nur wenn genau eine Zeile da ist)
+        row = df_donut.iloc[0]
+        values = [row[src] for src in ENERGY_SOURCES]
 
         donut_df = pd.DataFrame(
             {

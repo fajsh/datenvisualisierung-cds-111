@@ -2,7 +2,7 @@ import streamlit as st
 
 
 def apply_compact_layout():
-    st.markdown(
+    st.components.v1.html(
         """
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <style>
@@ -64,5 +64,5 @@ def apply_compact_layout():
 
         </style>
         """,
-        unsafe_allow_html=True,
+        height=0,
     )
