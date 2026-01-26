@@ -4,6 +4,7 @@ import streamlit as st
 def apply_compact_layout():
     st.markdown(
         """
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <style>
 
         /* App Background */

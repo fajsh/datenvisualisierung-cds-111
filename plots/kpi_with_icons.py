@@ -71,7 +71,7 @@ def _kpi_card(icon, title, value, unit="GWh"):
             box-sizing: border-box;
             margin-bottom: 0.4rem;
         ">
-            <span style="font-size: 1.2rem; width: 1.6rem; text-align: center;">{icon}</span>
+            <span class="material-icons" style="font-size: 1.2rem; width: 1.6rem; text-align: center;">{icon}</span>
             <div>
                 <div style="font-size: 0.8rem; font-weight: 600; line-height: 1.2;">{title}</div>
                 <div style="font-size: 0.75rem; opacity: 0.75; line-height: 1.2;">{value:.1f} {unit}</div>
@@ -90,16 +90,25 @@ def render_energy_kpis(df_monthly_sums):
 
     kpis = compute_kpis(df_monthly_sums)
 
+    icons = {
+        "Net production": "bolt",
+        "National consumption": "flag",
+        "Pumped storage consumption": "water_drop",
+        "Export": "north_east",
+        "Import": "south_west",
+        "Rhine streamflow": "waves",
+    }
+
     cols = st.columns(6)
     with cols[0]:
-        _kpi_card("⚡", "Net production", kpis["Net production"])
+        _kpi_card(icons["Net production"], "Net production", kpis["Net production"])
     with cols[1]:
-        _kpi_card("🇨🇭", "National consumption", kpis["National consumption"])
+        _kpi_card(icons["National consumption"], "National consumption", kpis["National consumption"])
     with cols[2]:
-        _kpi_card("💧", "Pumped storage consumption", kpis["Pumped storage consumption"])
+        _kpi_card(icons["Pumped storage consumption"], "Pumped storage consumption", kpis["Pumped storage consumption"])
     with cols[3]:
-        _kpi_card("➡️", "Export", kpis["Export"])
+        _kpi_card(icons["Export"], "Export", kpis["Export"])
     with cols[4]:
-        _kpi_card("⬅️", "Import", kpis["Import"])
+        _kpi_card(icons["Import"], "Import", kpis["Import"])
     with cols[5]:
-        _kpi_card("🌊", "Rhine streamflow", kpis["Rhine streamflow"])
+        _kpi_card(icons["Rhine streamflow"], "Rhine streamflow", kpis["Rhine streamflow"])
